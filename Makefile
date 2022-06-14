@@ -1,5 +1,8 @@
 test:
-	npm run test
+	npm test
+
+cover:
+	npm test -- --coverage --coverageProvider=v8
 
 fix:
 	npx eslint --fix .

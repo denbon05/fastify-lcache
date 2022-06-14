@@ -6,10 +6,11 @@ const getSimpleApp = () => {
   const port = 3333;
   const address = '0.0.0.0';
   const app = fastify();
-  app.register(lcache);
+  const lcacheOptions = { ttl: 2 };
+  app.register(lcache, lcacheOptions);
 
   app.after(() => {
-    app.get('/ping', async (req, reply) => {
+    app.get('/ping', async (_req, reply) => {
       reply.send('pong');
     });
   });

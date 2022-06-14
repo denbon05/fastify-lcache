@@ -4,11 +4,17 @@ import type {
   Src, SrcMeta, IStorageOptions,
 } from './types/storage';
 
+const getMilliseconds = (min: number): number => min * 60000;
+
+const formatOptions = (opts: IStorageOptions): IStorageOptions => ({
+  ttl: getMilliseconds(opts.ttl),
+});
+
 export class Storage {
   private src: Src = new Map();
 
   private options: IStorageOptions = {
-    ttl: 7000,
+    ttl: getMilliseconds(5),
   };
 
   private srcMeta: SrcMeta = new Map();
@@ -50,8 +56,12 @@ export class Storage {
   }
 }
 
-const cache: FastifyPluginCallback = (instance: FastifyInstance, opts: IStorageOptions, next) => {
-  const storage = new Storage(opts);
+const cache: FastifyPluginCallback<IStorageOptions> = (
+  instance: FastifyInstance,
+  opts: IStorageOptions,
+  next,
+) => {
+  const storage = new Storage(formatOptions(opts));
 
   instance.addHook('onSend', async ({ url }, _reply, payload) => {
     if (!storage.has(url)) {

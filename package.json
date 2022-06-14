@@ -1,17 +1,21 @@
 {
-  "name": "fastify-lcahce",
-  "version": "0.0.1",
+  "name": "fastify-lcache",
+  "version": "1.0.0",
   "description": "Light cache plugin for fastify",
-  "main": "lib/index.ts",
+  "main": "dist/lib/lcache.js",
+  "types": "lib/types/lcache.d.ts",
   "scripts": {
     "test": "jest",
+    "lint": "npx eslint .",
     "build": "tsc"
   },
   "keywords": [
     "fastify",
     "fastify-plugin",
-    "cache"
+    "cache",
+    "light-cache"
   ],
+  "files": ["dist/*.js", "dist/**/*.js", "lib/types"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/denbon05/fastify-lcache.git"

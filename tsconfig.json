@@ -7,6 +7,8 @@
     "baseUrl": ".",
     "outDir": "dist",
     "resolveJsonModule": true,
+    "composite": true,
+    "declarationDir": "types",
     "typeRoots": [
       "./node_modules/@types",
       "./lib/types"
