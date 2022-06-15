@@ -1,8 +1,8 @@
 import 'fastify';
-import { Storage } from '../lcache';
+import { IStorage } from './storage';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    lcache: Storage
+    lcache: IStorage
   }
 }

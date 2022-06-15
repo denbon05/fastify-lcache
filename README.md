@@ -15,11 +15,19 @@ npm i fastify-lcache
 ## Example
 
 ```js
+const address = '0.0.0.0';
+const port = 4000;
+```
+
+```js
+// your app
 import fastify from 'fastify';
 import lcache from 'fastify-lcache';
 
 const app = fastify();
-app.register(lcache, { ttl: 10 }); // default 5 minutes
+app.register(lcache, {
+  ttl: 10, // set cached data lifetime to 10 minutes
+});
 
 app.after(() => {
   // add your routes
@@ -31,12 +39,46 @@ app.after(() => {
 app.listen(port, address);
 ```
 
+```js
+// client wants data from your app
+const url = 'http://0.0.0.0:4000/ping';
+// first request will return origin data from route '/ping'
+axios.get(url);
+// the following requests within 10 minutes will return cached data on this route
+axios.get(url);
+```
+
+<dl>
+<dt><b>IMPORTANT</b></dt>
+<dd><i>Restarting your app resets the cache</i></dd>
+</dl>
+
 ## API
 
-### Options
+### Options (default)
 
 ```js
 {
-  ttl?: 5, // default cache time is 5 minutes
+  ttl?: 5,
+  storageType?: 'Map',
+}
+```
+
+### On fastify instance
+
+```js
+// app.lcache available inside your app
+// you can specify data type: app.lcache.get<{ name: string }>('person')
+
+interface IStorage {
+  get<T>(key: string): T; // Get cached data
+
+  set<T>(key: string, value: T): void; // Set data to cache
+
+  has(key: string): boolean; // Check if data exists in cache
+
+  reset(key?: string): void; // Clear all data in cache if key not specified
+
+  destroy(): void; // Clear Interval which check data lifetime
 }
 ```

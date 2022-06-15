@@ -1,29 +1,7 @@
-/* eslint-disable no-underscore-dangle */
-/// <reference types="node" />
-import { FastifyPluginCallback } from 'fastify';
 import type { IStorageOptions } from './storage';
 
-export declare class Storage {
-  private src;
+export type StorageType = 'Map'
 
-  private options;
-
-  private srcMeta;
-
-  private intervalId;
-
-  private initCacheCleaner;
-
-  constructor(options?: IStorageOptions);
-
-  get(key: string): unknown;
-
-  set(key: string, value: unknown): void;
-
-  has(key: string): boolean;
-
-  destroy(): void;
+export interface ICacheOptions extends IStorageOptions {
+  storageType?: StorageType
 }
-declare const _default: FastifyPluginCallback<IStorageOptions, import('http').Server>;
-export default _default;
-// # sourceMappingURL=lcache.d.ts.map
