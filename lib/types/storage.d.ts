@@ -5,8 +5,11 @@ import { FastifyPluginCallback } from 'fastify';
 export interface IStorageOptions {
   ttl?: number;
 }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Src = Map<string, any>;
+type StorageMap = Map<string, any>;
+
+export type Src = StorageMap;
 export type SrcMeta = Map<
   string,
   {
@@ -27,4 +30,3 @@ export interface IStorage {
 }
 declare const _default: FastifyPluginCallback<IStorageOptions, import('http').Server>;
 export default _default;
-// # sourceMappingURL=lcache.d.ts.map

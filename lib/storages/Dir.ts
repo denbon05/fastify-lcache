@@ -2,7 +2,7 @@ import type {
   Src, SrcMeta, IStorageOptions, IStorage,
 } from '../types/storage';
 
-class MapStorage implements IStorage {
+class DirStorage implements IStorage {
   private src: Src = new Map();
 
   private options: IStorageOptions;
@@ -73,4 +73,4 @@ class MapStorage implements IStorage {
   }
 }
 
-export default MapStorage;
+export default DirStorage;
