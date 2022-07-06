@@ -1,8 +1,8 @@
 {
   "name": "fastify-lcache",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Light cache plugin for fastify",
-  "main": "dist/lib/lcache.js",
+  "main": "dist/lcache.js",
   "types": "lib/types/lcache.d.ts",
   "scripts": {
     "test": "jest",
