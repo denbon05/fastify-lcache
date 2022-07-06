@@ -15,9 +15,8 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   _next,
 ) => {
   const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
-  const Storage = storages[pluginOpts.storageType];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { storageType, ...storageOpts } = pluginOpts;
+  const Storage = storages[storageType];
   const storage = new Storage(storageOpts);
 
   instance.addHook('onSend', async ({ url }, _reply, payload) => {
