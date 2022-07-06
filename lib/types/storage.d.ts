@@ -1,7 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-/// <reference types="node" />
-import { FastifyPluginCallback } from 'fastify';
-
 export interface IStorageOptions {
   ttl?: number;
 }
@@ -25,6 +22,3 @@ export interface IStorage {
 
   destroy(): void;
 }
-declare const _default: FastifyPluginCallback<IStorageOptions, import('http').Server>;
-export default _default;
-// # sourceMappingURL=lcache.d.ts.map
