@@ -1,5 +1,8 @@
 import {
-  Src, SrcMeta, IStorageOptions, IStorage,
+  Src,
+  SrcMeta,
+  IStorage,
+  IStorageOptions,
 } from '../types/storage';
 
 export default class Storage implements IStorage {
