@@ -3,6 +3,7 @@ import {
   SrcMeta,
   IStorage,
   IStorageOptions,
+  CachedResponse,
 } from '../types/storage';
 
 export default class Storage implements IStorage {
@@ -36,14 +37,14 @@ export default class Storage implements IStorage {
   /**
    * Get cached data
    */
-  public get<T>(key: string): T {
+  public get<T>(key: string): CachedResponse<T> {
     return this.src.get(key);
   }
 
   /**
    * Set data to cache
    */
-  public set<T>(key: string, value: T): void {
+  public set<T>(key: string, value: CachedResponse<T>): void {
     this.src.set(key, value);
     this.srcMeta.set(key, { updatedAt: Date.now() });
   }

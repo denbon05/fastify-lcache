@@ -17,6 +17,10 @@ const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
       reply.send('pong');
     });
 
+    app.get('/json', async (_req, reply) => {
+      reply.send({ hello: 'world' });
+    });
+
     app.post('/post', async (req: any, reply) => {
       reply.status(201);
       reply.send(req.body.data);
@@ -63,6 +67,21 @@ describe('cache', () => {
     expect(res2.body).toBe('pong');
     expect(spy).toHaveBeenCalled();
   });
+
+  test('Cache should return same headers as the original request', async () => {
+    const spy = jest.spyOn(app.lcache, 'get');
+    const getJson = async () => app.inject({
+      method: 'GET',
+      path: '/json',
+    });
+
+    const res1 = await getJson();
+    const res2 = await getJson();
+
+    expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
+    expect(spy).toHaveBeenCalled();
+  });
+
 });
 
 describe('Caching with custom options', () => {

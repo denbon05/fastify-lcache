@@ -21,10 +21,8 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   }
 
   const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
-  const {
-    storageType,
-    ...storageOpts
-  } = pluginOpts;
+  const { storageType, ...storageOpts } = pluginOpts;
+
   const Storage = storages[storageType];
   const storage = new Storage(storageOpts);
 
@@ -36,7 +34,11 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
       !storage.has(requestId) &&
       shouldBeCached(pluginOpts, request, reply.statusCode)
     ) {
-      storage.set(requestId, payload);
+      storage.set(requestId, {
+        payload,
+        headers: reply.getHeaders(),
+        statusCode: reply.statusCode,
+      });
     }
   });
 
@@ -44,7 +46,10 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     const requestId = url + method;
 
     if (storage.has(requestId)) {
-      reply.send(storage.get(requestId));
+      const { headers, payload, statusCode } = storage.get(requestId);
+      reply.headers(headers);
+      reply.status(statusCode);
+      reply.send(payload);
     }
   });
 
