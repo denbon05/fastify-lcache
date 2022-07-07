@@ -26,7 +26,7 @@ import lcache from 'fastify-lcache';
 
 const app = fastify();
 app.register(lcache, {
-  ttl: 10, // set cached data lifetime to 10 minutes
+  ttlInMinutes: 10, // set cached data lifetime to 10 minutes
 });
 
 app.after(() => {
@@ -59,8 +59,12 @@ axios.get(url);
 
 ```js
 {
-  ttl?: 5,
+  ttlInMinutes?: 5,
   storageType?: 'Map',
+  statusesToCache?: [200],
+  methodsToCache?: ['GET'],
+  disableCache?: false;
+  excludeRoutes?: undefined;
 }
 ```
 
@@ -68,12 +72,18 @@ axios.get(url);
 
 ```js
 // app.lcache available inside your app
-// you can specify data type: app.lcache.get<{ name: string }>('person')
+// you can specify payload data type: app.lcache.get<{ name: string }>('person')
+
+interface CachedResponse<T> {
+  payload: T;
+  headers?: { [key: string]: string | number | string[]; };
+  statusCode?: number;
+}
 
 interface IStorage {
-  get<T>(key: string): T; // Get cached data
+  get<T>(key: string): CachedResponse<T>; // Get cached data
 
-  set<T>(key: string, value: T): void; // Set data to cache
+  set<T>(key: string, value: CachedResponse<T>): void; // Set data to cache
 
   has(key: string): boolean; // Check if data exists in cache
 
