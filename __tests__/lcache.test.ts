@@ -21,6 +21,7 @@ const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
       reply.send({ hello: 'world' });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any  
     app.post('/post', async (req: any, reply) => {
       reply.status(201);
       reply.send(req.body.data);
@@ -30,6 +31,7 @@ const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
       setTimeout(() =>  reply.send(Date.now()), Math.random() * 100)
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     app.put('/put', async (req: any, reply) => {
       reply.status(201).send(req.body.data);
     });

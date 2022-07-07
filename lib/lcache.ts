@@ -17,7 +17,9 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   _next,
 ) => {
   if (opts.disableCache) {
-    return _next();
+    _next();
+
+    return false;
   }
 
   const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
