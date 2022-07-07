@@ -7,7 +7,7 @@ export type Src = Map<string, any>;
 export type SrcMeta = Map<
   string,
   {
-    updatedAt: Date;
+    updatedAt: number;
   }
 >;
 

@@ -17,13 +17,12 @@ export default class Storage implements IStorage {
   private initCacheCleaner() {
     this.intervalId = setInterval(() => {
       this.srcMeta.forEach(({ updatedAt }, key) => {
-        const date = new Date();
-        const isTtlOutdate = date.getTime() - updatedAt.getTime() > this.options.ttl;
+        const isTtlOutdate = Date.now() - updatedAt > this.options.ttl;
         if (isTtlOutdate) {
           this.src.delete(key);
         }
       });
-    }, this.options.ttl);
+    }, 15000);
   }
 
   /**
@@ -46,7 +45,7 @@ export default class Storage implements IStorage {
    */
   public set<T>(key: string, value: T): void {
     this.src.set(key, value);
-    this.srcMeta.set(key, { updatedAt: new Date() });
+    this.srcMeta.set(key, { updatedAt: Date.now() });
   }
 
   /**
