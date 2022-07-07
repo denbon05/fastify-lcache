@@ -1,6 +1,6 @@
-/// <reference types='node' />
-import type { IStorageOptions } from './storage';
+/// <reference types="node" />
 import { FastifyPluginCallback } from 'fastify';
+import type { IStorageOptions } from './storage';
 
 export type StorageType = 'Map';
 

@@ -19,14 +19,14 @@ export const formatOptions = (opts: ICacheOptions): ICachePluginOptions => ({
 export const shouldBeCached = (
   opts: ICachePluginOptions,
   request: FastifyRequest,
-  statusCode: number
+  statusCode: number,
 ): boolean => {
   const { methodsToCache, statusesToCache, excludeRoutes } = opts;
   const { routerPath, method } = request;
 
   return (
-    methodsToCache.has(method as RequestMethod) &&
-    statusesToCache.has(statusCode) &&
-    !excludeRoutes.has(routerPath)
+    methodsToCache.has(method as RequestMethod)
+    && statusesToCache.has(statusCode)
+    && !excludeRoutes.has(routerPath)
   );
 };

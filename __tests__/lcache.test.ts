@@ -7,7 +7,7 @@ const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
   const lcacheOptions = {
     ttlInMinutes: 2,
     excludeRoutes,
-    statusesToCache
+    statusesToCache,
   };
 
   app.register(lcache, lcacheOptions);
@@ -21,14 +21,14 @@ const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
       reply.send({ hello: 'world' });
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     app.post('/post', async (req: any, reply) => {
       reply.status(201);
       reply.send(req.body.data);
     });
 
     app.get('/date', async (_req, reply) => {
-      setTimeout(() =>  reply.send(Date.now()), Math.random() * 100)
+      setTimeout(() => reply.send(Date.now()), Math.random() * 100);
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,14 +83,13 @@ describe('cache', () => {
     expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
     expect(spy).toHaveBeenCalled();
   });
-
 });
 
 describe('Caching with custom options', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await getSimpleApp(['/date'], [200,201]);
+    app = await getSimpleApp(['/date'], [200, 201]);
   });
 
   afterEach(async () => {
@@ -129,25 +128,25 @@ describe('Caching with custom options', () => {
     });
 
     expect(res1.body).not.toBe(res2.body);
-  })
+  });
 
   test('Method PUT should not be cached when only status code is 201', async () => {
     const res1 = await app.inject({
       method: 'PUT',
       path: '/put',
       payload: {
-        data: '456'
-      }
+        data: '456',
+      },
     });
 
     const res2 = await app.inject({
       method: 'PUT',
       path: '/put',
       payload: {
-        data: '123'
-      }
+        data: '123',
+      },
     });
 
     expect(res1.body).not.toBe(res2.body);
-  })
-})
+  });
+});
