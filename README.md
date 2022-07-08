@@ -50,17 +50,17 @@ axios.get(url);
 
 <dl>
 <dt><b>IMPORTANT</b></dt>
-<dd><i>Restarting your app resets the cache</i></dd>
+<dd><i>In case storageType <code>'tmp'</code> restarting your app resets the cache</i></dd>
 </dl>
 
 ## API
 
-### Options (default)
+### Options
 
 ```js
 {
   ttl?: 5,
-  storageType?: 'Map',
+  storageType?: 'tmp' | 'persistence' = 'tmp',
 }
 ```
 

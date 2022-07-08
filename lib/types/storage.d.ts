@@ -3,16 +3,17 @@ export interface IStorageOptions {
   ttl?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type StorageMap = Map<string, any>;
+export type StorageType = 'tmp' | 'persistence';
 
-export type Src = StorageMap;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StorageSrc = Map<string, any>;
+
 export type SrcMeta = Map<
-  string,
-  {
-    updatedAt: Date;
-  }
->;
+string,
+{
+  updatedAt: Date;
+}
+  >;
 
 export interface IStorage {
   get<T>(key: string): T;
@@ -23,5 +24,5 @@ export interface IStorage {
 
   reset(key?: string): void;
 
-  destroy(): void;
+  destroy(): Promise<void>;
 }

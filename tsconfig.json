@@ -7,8 +7,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "resolveJsonModule": true,
-    // "declaration": true,
-    // "declarationDir": "types",
+    "experimentalDecorators": true,
     "typeRoots": [
       "./node_modules/@types",
       "./lib/types"
@@ -19,7 +18,8 @@
     ]
   },
   "include": [
-    "lib/**/*.ts"
+    "lib/**/*.ts",
+    "lib/storages/memo/*.json"
   ],
   "exclude": [
     "__tests__/**/*.ts"

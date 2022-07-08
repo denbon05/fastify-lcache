@@ -1,9 +1,7 @@
-import type { IStorage } from 'lib/types/storage';
+import FileStorage from './File';
 import MapStorage from './Map';
 
 export default {
-  Map: MapStorage,
+  tmp: MapStorage,
+  persistence: FileStorage,
 };
-
-const getStorage = (storageType: string): IStorage => [MapStorage]
-  .find((Storage) => Storage.name === `${storageType}Storage`);

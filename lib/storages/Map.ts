@@ -1,9 +1,9 @@
 import type {
-  Src, SrcMeta, IStorageOptions, IStorage,
+  IStorage, IStorageOptions, SrcMeta, StorageSrc,
 } from '../types/storage';
 
 class MapStorage implements IStorage {
-  private src: Src = new Map();
+  private src: StorageSrc = new Map();
 
   private options: IStorageOptions;
 
@@ -21,6 +21,22 @@ class MapStorage implements IStorage {
         }
       });
     }, this.options.ttl);
+  }
+
+  protected setSrc(data: StorageSrc) {
+    this.src = new Map(data);
+  }
+
+  protected setSrcMeta(data: SrcMeta) {
+    this.srcMeta = new Map(data);
+  }
+
+  protected getSrc(): StorageSrc {
+    return this.src;
+  }
+
+  protected getSrcMeta(): SrcMeta {
+    return this.srcMeta;
   }
 
   /**
@@ -68,7 +84,7 @@ class MapStorage implements IStorage {
   /**
    * Clear Interval which check data lifetime
    */
-  public destroy(): void {
+  public async destroy(): Promise<void> {
     clearInterval(this.intervalId);
   }
 }

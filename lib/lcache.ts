@@ -6,7 +6,7 @@ import storages from './storages';
 
 const defaultOpts: ICacheOptions = {
   ttl: 5,
-  storageType: 'Map',
+  storageType: 'tmp',
 };
 
 const cache: FastifyPluginCallback<ICacheOptions> = (
@@ -29,9 +29,8 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
       reply.send(storage.get(url));
     }
   });
-  instance.addHook('onClose', (_instance, done) => {
-    storage.destroy();
-    done();
+  instance.addHook('onClose', async () => {
+    await storage.destroy();
   });
   instance.decorate('lcache', storage);
 
