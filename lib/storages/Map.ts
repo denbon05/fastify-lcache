@@ -1,5 +1,9 @@
 import {
-  Src, SrcMeta, IStorageOptions, IStorage,
+  Src,
+  SrcMeta,
+  IStorage,
+  IStorageOptions,
+  CachedResponse,
 } from '../types/storage';
 
 export default class Storage implements IStorage {
@@ -14,13 +18,12 @@ export default class Storage implements IStorage {
   private initCacheCleaner() {
     this.intervalId = setInterval(() => {
       this.srcMeta.forEach(({ updatedAt }, key) => {
-        const date = new Date();
-        const isTtlOutdate = date.getTime() - updatedAt.getTime() > this.options.ttl;
+        const isTtlOutdate = Date.now() - updatedAt > this.options.ttl;
         if (isTtlOutdate) {
           this.src.delete(key);
         }
       });
-    }, this.options.ttl);
+    }, 15000);
   }
 
   /**
@@ -34,16 +37,16 @@ export default class Storage implements IStorage {
   /**
    * Get cached data
    */
-  public get<T>(key: string): T {
+  public get<T>(key: string): CachedResponse<T> {
     return this.src.get(key);
   }
 
   /**
    * Set data to cache
    */
-  public set<T>(key: string, value: T): void {
+  public set<T>(key: string, value: CachedResponse<T>): void {
     this.src.set(key, value);
-    this.srcMeta.set(key, { updatedAt: new Date() });
+    this.srcMeta.set(key, { updatedAt: Date.now() });
   }
 
   /**
