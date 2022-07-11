@@ -1,21 +1,27 @@
 import { promises as fsPromises } from 'fs';
 import { join } from 'path';
+import { formatToJSON, getPersistentStorageDirPath } from '../helpers';
 import type {
-  IStorage, IStorageOptions,
+  DataStorageType,
+  IStorage, StorageSrc,
 } from '../types/storage';
-import { formatToJSON } from '../helpers';
 import MapStorage from './Map';
 
 class FileStorage extends MapStorage implements IStorage {
-  private storageFilePath: string = join('memo', '.data.json');
+  private storageDir = getPersistentStorageDirPath();
 
-  private storageMetaPath: string = join('memo', '.meta.json');
+  private storageFilePath: string = join(this.storageDir, '.data.json');
 
-  private async read(src: 'data' | 'meta') {
+  private storageMetaPath: string = join(this.storageDir, '.meta.json');
+
+  private async createStorageSrc(src: DataStorageType): Promise<StorageSrc> {
     const jsonData = await fsPromises
-      .readFile((src === 'data' ? this.storageFilePath : this.storageMetaPath), { encoding: 'utf-8' });
+      .readFile(
+        (src === 'data' ? this.storageFilePath : this.storageMetaPath),
+        { encoding: 'utf-8' },
+      );
 
-    return JSON.parse(jsonData);
+    return new Map(Object.entries(JSON.parse(jsonData)));
   }
 
   private async updatePersistenceStorage(): Promise<void> {
@@ -27,16 +33,11 @@ class FileStorage extends MapStorage implements IStorage {
   }
 
   private async updateTmpStorage(): Promise<void> {
-    const storageData = await this.read('data');
-    const storageMeta = await this.read('meta');
+    const storageData = await this.createStorageSrc('data');
+    const storageMeta = await this.createStorageSrc('meta');
 
     super.setSrc(storageData);
     super.setSrcMeta(storageMeta);
-  }
-
-  public constructor(options: IStorageOptions) {
-    super(options);
-    this.updateTmpStorage();
   }
 
   /**
@@ -46,6 +47,13 @@ class FileStorage extends MapStorage implements IStorage {
   public async destroy(): Promise<void> {
     await this.updatePersistenceStorage();
     await super.destroy();
+  }
+
+  /**
+   * Prepare and sync storages
+   */
+  public async setup(): Promise<void> {
+    await this.updateTmpStorage();
   }
 }
 

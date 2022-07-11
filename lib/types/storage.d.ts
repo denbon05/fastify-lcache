@@ -16,12 +16,9 @@ export interface CachedResponse<T> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Src = Map<string, CachedResponse<any>>;
-export type SrcMeta = Map<
-  string,
-  {
-    updatedAt: number;
-  }
->;
+export type SrcMeta = Map<string, { updatedAt: number; }>;
+
+export type DataStorageType = 'data' | 'meta';
 
 export interface IStorage {
   get<T>(key: string): CachedResponse<T>;
@@ -33,4 +30,6 @@ export interface IStorage {
   reset(key?: string): void;
 
   destroy(): Promise<void>;
+
+  setup(): Promise<void>;
 }

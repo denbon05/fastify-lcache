@@ -7,7 +7,8 @@
   "scripts": {
     "test": "jest",
     "lint": "npx eslint .",
-    "pre-build": "rm -fr dist",
+    "clear-cache": "echo '{}' > lib/storages/memo/.data.json && echo '{}' > lib/storages/memo/.meta.json",
+    "pre-build": "rm -fr dist && npm run clear-cache",
     "build": "npm run pre-build && tsc"
   },
   "keywords": [

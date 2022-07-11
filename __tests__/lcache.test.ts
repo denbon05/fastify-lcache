@@ -1,62 +1,36 @@
-import fastify, { FastifyInstance } from 'fastify';
-import type { StorageType } from '../lib/types/storage';
+import { FastifyInstance } from 'fastify';
 import '../lib/types/fastify';
-import type { ICacheOptions } from '../lib/types/lcache';
-import lcache from '../lib/lcache';
-
-const defaultOptions: ICacheOptions = {
-  ttlInMinutes: 2,
-  excludeRoutes: [],
-  statusesToCache: [200],
-};
-
-const getSimpleApp = (options: ICacheOptions = {}) => {
-  const app = fastify();
-  app.register(lcache, { ...defaultOptions, ...options });
-
-  app.after(() => {
-    app.get('/ping', async (_req, reply) => {
-      reply.send('pong');
-    });
-
-    app.get('/json', async (_req, reply) => {
-      reply.send({ hello: 'world' });
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.post('/post', async (req: any, reply) => {
-      reply.status(201);
-      reply.send(req.body.data);
-    });
-
-    app.get('/date', async (_req, reply) => {
-      setTimeout(() => reply.send(Date.now()), Math.random() * 100);
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.put('/put', async (req: any, reply) => {
-      reply.status(201).send(req.body.data);
-    });
-  });
-
-  return app;
-};
+import type { StorageType } from '../lib/types/storage';
+import { getApp, readMemo, writeMemo } from './helpers';
 
 describe('cache', () => {
   const storageTypes: StorageType[] = ['tmp', 'persistence'];
   let app: FastifyInstance;
+  let memoData: string;
+  let memoMeta: string;
+
+  beforeAll(async () => {
+    memoData = await readMemo('data');
+    memoMeta = await readMemo('meta');
+  });
+
+  afterAll(async () => {
+    await writeMemo('data', memoData);
+    await writeMemo('meta', memoMeta);
+  });
 
   afterEach(async () => {
     await app.close();
   });
 
-  test.each(storageTypes)('plugin exists on app instance %p', async () => {
-    app = await getSimpleApp();
+  test.each(storageTypes)('Plugin is exist on { storageType: %p }', async (storageType) => {
+    app = await getApp({ storageType });
     expect(app.hasDecorator('lcache')).toBeTruthy();
   });
 
-  test('temporary storage (default) is working', async () => {
-    app = await getSimpleApp();
+  test('Temporary (default) storage working', async () => {
+    app = await getApp();
+
     const spy = jest.spyOn(app.lcache, 'get');
     const getPing = async () => app.inject({
       method: 'GET',
@@ -65,29 +39,33 @@ describe('cache', () => {
 
     const res1 = await getPing();
     expect(res1.body).toBe('pong');
+    expect(spy).not.toHaveBeenCalled();
 
     const res2 = await getPing();
     expect(res2.body).toBe('pong');
     expect(spy).toHaveBeenCalled();
   });
 
-  test('persistence storage is working', async () => {
-    app = await getSimpleApp({ storageType: 'persistence' });
-    const spy = jest.spyOn(app.lcache, 'get');
+  test('Persistence storage save data after app was reloading', async () => {
+    app = await getApp({ storageType: 'persistence' });
     const getPing = async () => app.inject({
       method: 'GET',
       path: '/ping',
     });
 
-    const res1 = await getPing();
-    expect(res1.body).toBe('pong');
+    const { body: actualBody } = await getPing();
+    app.close();
 
-    const res2 = await getPing();
-    expect(res2.body).toBe('pong');
+    app = await getApp({ storageType: 'persistence' });
+    const spy = jest.spyOn(app.lcache, 'get');
+
+    const { body: expectedBody } = await getPing();
     expect(spy).toHaveBeenCalled();
+    expect(expectedBody).toEqual(actualBody);
   });
 
   test('Cache should return same headers as the original request', async () => {
+    app = await getApp();
     const spy = jest.spyOn(app.lcache, 'get');
     const getJson = async () => app.inject({
       method: 'GET',
@@ -106,7 +84,7 @@ describe('Caching with custom options', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await getSimpleApp({ excludeRoutes: ['/date'], statusesToCache: [200, 201] });
+    app = await getApp({ excludeRoutes: ['/date'], statusesToCache: [200, 201] });
   });
 
   afterEach(async () => {

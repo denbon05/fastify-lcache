@@ -20,9 +20,6 @@ export interface ICacheOptions<> {
   excludeRoutes?: string[];
 }
 
-declare const _default: FastifyPluginCallback<
-  ICacheOptions,
-  import('http').Server
->;
+declare const _default: FastifyPluginCallback<ICacheOptions, import('http').Server>;
 
 export default _default;

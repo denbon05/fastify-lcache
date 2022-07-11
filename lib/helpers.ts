@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import type { FastifyRequest } from 'fastify';
+import { resolve } from 'path';
 import type {
   RequestMethod,
   ICacheOptions,
@@ -18,6 +19,8 @@ export const formatOptions = (opts: ICacheOptions): ICachePluginOptions => ({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatToJSON = (data: Iterable<any>) => JSON.stringify(Object.fromEntries(data));
+
+export const getPersistentStorageDirPath = () => resolve(process.cwd(), 'lib/storages/memo');
 
 export const shouldBeCached = (
   opts: ICachePluginOptions,

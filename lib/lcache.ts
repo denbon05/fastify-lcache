@@ -9,15 +9,14 @@ const defaultOpts: ICacheOptions = {
   storageType: 'tmp',
   statusesToCache: [200],
   methodsToCache: ['GET'],
+  excludeRoutes: [],
 };
 
-const cache: FastifyPluginCallback<ICacheOptions> = (
+const cache: FastifyPluginCallback<ICacheOptions> = async (
   instance: FastifyInstance,
   opts: ICacheOptions,
-  _next,
 ) => {
   if (opts.disableCache) {
-    _next();
     return;
   }
 
@@ -26,6 +25,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
   const Storage = storages[storageType];
   const storage = new Storage(storageOpts);
+  await storage.setup();
 
   instance.addHook('onSend', async (request, reply, payload) => {
     const { url, method } = request;
@@ -58,8 +58,6 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   });
 
   instance.decorate('lcache', storage);
-
-  _next();
 };
 
 /**

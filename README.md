@@ -42,7 +42,7 @@ app.listen(port, address);
 ```js
 // client wants data from your app
 const url = 'http://0.0.0.0:4000/ping';
-// first request will return origin data from route '/ping'
+// first request will return origin data from route '/ping' and put result to the cache
 axios.get(url);
 // the following requests within 10 minutes will return cached data on this route
 axios.get(url);
@@ -64,7 +64,7 @@ axios.get(url);
   statusesToCache?: [200],
   methodsToCache?: ['GET'],
   disableCache?: false;
-  excludeRoutes?: undefined;
+  excludeRoutes?: [];
 }
 ```
 

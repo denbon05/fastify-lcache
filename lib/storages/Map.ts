@@ -26,15 +26,15 @@ class MapStorage implements IStorage {
     }, 15000);
   }
 
-  protected setSrc(data: StorageSrc) {
-    this.src = new Map(data);
+  protected setSrc(src: StorageSrc) {
+    this.src = src;
   }
 
   protected setSrcMeta(data: SrcMeta) {
     this.srcMeta = new Map(data);
   }
 
-  protected getSrc(): StorageSrc {
+  public getSrc(): StorageSrc {
     return this.src;
   }
 
@@ -90,6 +90,9 @@ class MapStorage implements IStorage {
   public async destroy(): Promise<void> {
     clearInterval(this.intervalId);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, class-methods-use-this
+  public async setup() {}
 }
 
 export default MapStorage;
