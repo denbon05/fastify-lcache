@@ -14,12 +14,12 @@ npm i fastify-lcache
 
 ## Example
 
-```js
+```ts
 const address = '0.0.0.0';
 const port = 4000;
 ```
 
-```js
+```ts
 // your app
 import fastify from 'fastify';
 import lcache from 'fastify-lcache';
@@ -39,10 +39,10 @@ app.after(() => {
 app.listen(port, address);
 ```
 
-```js
+```ts
 // client wants data from your app
 const url = 'http://0.0.0.0:4000/ping';
-// first request will return origin data from route '/ping'
+// first request will return origin data from route '/ping' and put result to the cache
 axios.get(url);
 // the following requests within 10 minutes will return cached data on this route
 axios.get(url);
@@ -57,26 +57,25 @@ axios.get(url);
 
 ### Options (default)
 
-```js
+```ts
 {
   ttlInMinutes?: 5,
-  storageType?: 'Map',
   statusesToCache?: [200],
   methodsToCache?: ['GET'],
   disableCache?: false;
-  excludeRoutes?: undefined;
+  excludeRoutes?: [];
 }
 ```
 
 ### On fastify instance
 
-```js
+```ts
 // app.lcache available inside your app
 // you can specify payload data type: app.lcache.get<{ name: string }>('person')
 
 interface CachedResponse<T> {
   payload: T;
-  headers?: { [key: string]: string | number | string[]; };
+  headers?: { [key: string]: string | number | string[] };
   statusCode?: number;
 }
 

@@ -2,11 +2,10 @@ import { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
 import type { ICacheOptions } from './types/lcache';
 import { formatOptions, shouldBeCached } from './helpers';
-import storages from './storages';
+import MapStorage from './storage/Map';
 
 const defaultOpts: ICacheOptions = {
   ttlInMinutes: 5,
-  storageType: 'Map',
   statusesToCache: [200],
   methodsToCache: ['GET'],
 };
@@ -21,11 +20,9 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     return;
   }
 
-  const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
-  const { storageType, ...storageOpts } = pluginOpts;
+  const storageOpts = formatOptions({ ...defaultOpts, ...opts });
 
-  const Storage = storages[storageType];
-  const storage = new Storage(storageOpts);
+  const storage = new MapStorage(storageOpts);
 
   instance.addHook('onSend', async (request, reply, payload) => {
     const { url, method } = request;
@@ -33,7 +30,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
     if (
       !storage.has(requestId)
-      && shouldBeCached(pluginOpts, request, reply.statusCode)
+      && shouldBeCached(storageOpts, request, reply.statusCode)
     ) {
       storage.set(requestId, {
         payload,

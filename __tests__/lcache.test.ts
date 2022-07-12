@@ -1,61 +1,23 @@
 import '../lib/types/fastify';
-import fastify, { FastifyInstance } from 'fastify';
-import lcache from '../lib/lcache';
-
-const getSimpleApp = (excludeRoutes?: string[], statusesToCache = [200]) => {
-  const app = fastify();
-  const lcacheOptions = {
-    ttlInMinutes: 2,
-    excludeRoutes,
-    statusesToCache,
-  };
-
-  app.register(lcache, lcacheOptions);
-
-  app.after(() => {
-    app.get('/ping', async (_req, reply) => {
-      reply.send('pong');
-    });
-
-    app.get('/json', async (_req, reply) => {
-      reply.send({ hello: 'world' });
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.post('/post', async (req: any, reply) => {
-      reply.status(201);
-      reply.send(req.body.data);
-    });
-
-    app.get('/date', async (_req, reply) => {
-      setTimeout(() => reply.send(Date.now()), Math.random() * 100);
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.put('/put', async (req: any, reply) => {
-      reply.status(201).send(req.body.data);
-    });
-  });
-
-  return app;
-};
+import { FastifyInstance } from 'fastify';
+import { getApp } from './helpers';
 
 describe('cache', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await getSimpleApp();
+    app = await getApp();
   });
 
   afterEach(async () => {
     await app.close();
   });
 
-  test('plugin exists on app instance', () => {
+  test('Plugin exists on app instance', () => {
     expect(app.hasDecorator('lcache')).toBeTruthy();
   });
 
-  test('cache is working', async () => {
+  test('Cache is working', async () => {
     const spy = jest.spyOn(app.lcache, 'get');
     const getPing = async () => app.inject({
       method: 'GET',
@@ -89,7 +51,7 @@ describe('Caching with custom options', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await getSimpleApp(['/date'], [200, 201]);
+    app = await getApp({ excludeRoutes: ['/date'], statusesToCache: [200, 201] });
   });
 
   afterEach(async () => {

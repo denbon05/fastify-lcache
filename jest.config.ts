@@ -7,4 +7,7 @@ export default {
     },
   },
   moduleFileExtensions: ['js', 'ts', 'd.ts'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/__tests__/helpers/',
+  ],
 };
