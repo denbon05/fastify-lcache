@@ -7,7 +7,8 @@
   "scripts": {
     "test": "jest",
     "lint": "npx eslint .",
-    "build": "tsc"
+    "pre-build": "rm -fr dist",
+    "build": "npm run pre-build && tsc"
   },
   "keywords": [
     "fastify",
@@ -15,7 +16,7 @@
     "cache",
     "light-cache"
   ],
-  "files": ["dist/*.js", "dist/**/*.js", "lib/types"],
+  "files": ["dist/**", "lib/types"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/denbon05/fastify-lcache.git"
