@@ -3,7 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/6dfec3501aa3eb441bab/maintainability)](https://codeclimate.com/github/denbon05/fastify-lcache/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/6dfec3501aa3eb441bab/test_coverage)](https://codeclimate.com/github/denbon05/fastify-lcache/test_coverage)
 
-<p>fastify-lcache plugin for <a href="https://www.fastify.io/" target="_blank">Fastify</a> for memoize
+<p>fastify-lcache plugin for <a href="https://www.fastify.io/" target="_blank">Fastify</a> for memorize
 data on first request and use next time until <a href="https://en.wikipedia.org/wiki/Time_to_live"  target="_blank">ttl</a> expires</p>
 
 <p>Supports Fastify version ^3.0.0</p>
@@ -42,9 +42,11 @@ app.listen(port, address);
 ```ts
 // client wants data from your app
 const url = 'http://0.0.0.0:4000/ping';
-// first request will return origin data from route '/ping' and put result to the cache
+// first request will return origin data from route '/ping'
+// and put result to the cache
 axios.get(url);
-// the following requests within 10 minutes will return cached data on this route
+// the following requests within 10 minutes
+// will return cached data on this route
 axios.get(url);
 ```
 
@@ -60,18 +62,20 @@ axios.get(url);
 ```ts
 {
   ttlInMinutes?: 5,
+  disableCache?: false;
   statusesToCache?: [200],
   methodsToCache?: ['GET'],
-  disableCache?: false;
   excludeRoutes?: [];
 }
 ```
 
 ### On fastify instance
 
+<p><b>app.lcache</b> available inside your app</p>
+
 ```ts
-// app.lcache available inside your app
-// you can specify payload data type: app.lcache.get<{ name: string }>('person')
+// you can specify payload data type:
+// app.lcache.get<{ name: string }>('person')
 
 interface CachedResponse<T> {
   payload: T;
@@ -80,14 +84,19 @@ interface CachedResponse<T> {
 }
 
 interface IStorage {
-  get<T>(key: string): CachedResponse<T>; // Get cached data
+  // Get cached data
+  get<T>(key: string): CachedResponse<T>;
 
-  set<T>(key: string, value: CachedResponse<T>): void; // Set data to cache
+  // Set data to cache
+  set<T>(key: string, value: CachedResponse<T>): void;
 
-  has(key: string): boolean; // Check if data exists in cache
+  // Check if data exists in cache
+  has(key: string): boolean;
 
-  reset(key?: string): void; // Clear all data in cache if key not specified
+  // Clear all data in cache if key not specified
+  reset(key?: string): void;
 
-  destroy(): void; // Clear Interval which check data lifetime
+  // Clear Interval which check data lifetime
+  destroy(): void;
 }
 ```
