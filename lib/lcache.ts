@@ -66,5 +66,5 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
  */
 export default fp(cache, {
   name: '@fastify/lcache',
-  fastify: '4.x',
+  fastify: '3.x',
 });
