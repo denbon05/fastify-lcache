@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyPluginCallback } from 'fastify';
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
 import type { ICacheOptions } from './types/lcache';
 import { formatOptions, shouldBeCached } from './helpers';

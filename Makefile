@@ -1,3 +1,6 @@
+ci:
+	npm ci
+
 test:
 	npm test
 
