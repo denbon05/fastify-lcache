@@ -5,10 +5,10 @@
   "main": "dist/lcache.js",
   "types": "lib/types/lcache.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "npx jest",
     "lint": "npx eslint .",
     "pre-build": "rm -fr dist",
-    "build": "npm run pre-build && tsc"
+    "build": "npm run pre-build && npx tsc"
   },
   "keywords": [
     "fastify",
@@ -26,7 +26,7 @@
   },
   "author": "Denys Bondarenko",
   "engines": {
-    "node": "14.x"
+    "node": ">=14.x"
   },
   "license": "MIT",
   "devDependencies": {
