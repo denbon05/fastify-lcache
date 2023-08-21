@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [15.x]
+        node-version: [14.x, 15.x, 16.x, 17.x, 18.x]
 
     steps:
       - uses: actions/checkout@v3
@@ -18,9 +18,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - run: npm ci
       - run: npm run build
-      - run: make fix
+      - run: npm run lint
       - run: npm test
       - name: Check fastify v3.* compatibility
         run: |
@@ -29,7 +30,7 @@ jobs:
           npm test
 
       - name: Test & publish code coverage
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.actor == 'dependabot[bot]' }}
         uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
