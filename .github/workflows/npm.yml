@@ -1,6 +1,13 @@
 name: Publish Package to npmjs
 
 on:
+  workflow_run:
+    workflows:
+      - Node CI
+    branches:
+      - main
+    types:
+      - completed
   release:
     types: [created]
 
