@@ -25,6 +25,9 @@
     "url": "git+https://github.com/denbon05/fastify-lcache.git"
   },
   "author": "Denys Bondarenko",
+  "engines": {
+    "node": "14.x"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^28.1.1",
