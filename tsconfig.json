@@ -9,21 +9,11 @@
     "resolveJsonModule": true,
     // "declaration": true,
     // "declarationDir": "types",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./lib/types"
-    ],
-    "types": [
-      "node",
-      "jest"
-    ]
+    "typeRoots": ["./node_modules/@types", "./lib/types"],
+    "types": ["node", "jest"]
   },
-  "include": [
-    "lib/**/*.ts"
-  ],
-  "exclude": [
-    "__tests__/**/*.ts"
-  ],
+  "include": ["lib/**/*.ts"],
+  "exclude": ["__tests__/**/*.ts"],
   "ts-node": {
     "moduleTypes": {
       "jest.config.ts": "cjs"
