@@ -1,5 +1,5 @@
-import '../lib/types/fastify';
 import { FastifyInstance } from 'fastify';
+import '../lib/types/fastify';
 import { getApp } from './helpers';
 
 describe('cache', () => {
@@ -19,10 +19,11 @@ describe('cache', () => {
 
   test('Cache is working', async () => {
     const spy = jest.spyOn(app.lcache, 'get');
-    const getPing = async () => app.inject({
-      method: 'GET',
-      path: '/ping',
-    });
+    const getPing = async () =>
+      app.inject({
+        method: 'GET',
+        path: '/ping',
+      });
 
     const res1 = await getPing();
     expect(res1.body).toBe('pong');
@@ -34,10 +35,11 @@ describe('cache', () => {
 
   test('Cache should return same headers as the original request', async () => {
     const spy = jest.spyOn(app.lcache, 'get');
-    const getJson = async () => app.inject({
-      method: 'GET',
-      path: '/json',
-    });
+    const getJson = async () =>
+      app.inject({
+        method: 'GET',
+        path: '/json',
+      });
 
     const res1 = await getJson();
     const res2 = await getJson();
@@ -51,7 +53,10 @@ describe('Caching with custom options', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
-    app = await getApp({ excludeRoutes: ['/date'], statusesToCache: [200, 201] });
+    app = await getApp({
+      excludeRoutes: ['/date'],
+      statusesToCache: [200, 201],
+    });
   });
 
   afterEach(async () => {

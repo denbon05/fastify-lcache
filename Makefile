@@ -7,7 +7,10 @@ test:
 cover:
 	npm test -- --coverage --coverageProvider=v8
 
-fix:
+format:
+	npx prettier --write .
+
+fix: format
 	npx eslint --fix .
 
 build:

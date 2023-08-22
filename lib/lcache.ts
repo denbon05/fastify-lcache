@@ -13,7 +13,7 @@ const defaultOpts: ICacheOptions = {
 const cache: FastifyPluginCallback<ICacheOptions> = (
   instance: FastifyInstance,
   opts: ICacheOptions,
-  _next,
+  _next
 ) => {
   if (opts.disableCache) {
     _next();
@@ -29,8 +29,8 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     const requestId = url + method;
 
     if (
-      !storage.has(requestId)
-      && shouldBeCached(storageOpts, request, reply.statusCode)
+      !storage.has(requestId) &&
+      shouldBeCached(storageOpts, request, reply.statusCode)
     ) {
       storage.set(requestId, {
         payload,

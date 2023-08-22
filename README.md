@@ -6,7 +6,7 @@
 <p>fastify-lcache plugin for <a href="https://www.fastify.io/" target="_blank">Fastify</a> for memorize
 data on first request and use next time until <a href="https://en.wikipedia.org/wiki/Time_to_live"  target="_blank">ttl</a> expires</p>
 
-<p>Supports Fastify version since *3.0.0</p>
+<p>Supports Fastify version since ^3</p>
 
 ```bash
 npm i fastify-lcache

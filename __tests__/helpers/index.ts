@@ -24,7 +24,9 @@ export const getApp = (options: ICacheOptions = {}) => {
     });
 
     app.get('/date', async (_req, reply) => {
-      setTimeout(() => reply.send(Date.now()), Math.random() * 100);
+      await new Promise((resolve) => {
+        setTimeout(() => resolve(reply.send(Date.now())), Math.random() * 100);
+      });
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

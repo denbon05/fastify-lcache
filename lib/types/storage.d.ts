@@ -5,7 +5,7 @@ export interface IStorageOptions {
 
 export interface CachedResponse<T> {
   payload: T;
-  headers?: { [key: string]: string | number | string[]; };
+  headers?: { [key: string]: string | number | string[] };
   statusCode?: number;
 }
 
