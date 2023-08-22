@@ -15,16 +15,14 @@ npm i fastify-lcache
 ## Example
 
 ```ts
-const address = '0.0.0.0';
-const port = 4000;
-```
-
-```ts
 // your app
 import fastify from 'fastify';
 import lcache from 'fastify-lcache';
 
 const app = fastify();
+const address = '0.0.0.0';
+const port = 4000;
+
 app.register(lcache, {
   ttlInMinutes: 10, // set cached data lifetime to 10 minutes
 });
