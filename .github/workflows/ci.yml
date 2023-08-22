@@ -23,9 +23,9 @@ jobs:
       - run: npm run build
       - run: npm run lint
       - run: npm test
-      - name: Check fastify v3.* compatibility
+      - name: Check fastify v3 compatibility
         run: |
-          npm i fastify@3.*
+          npm i -D fastify@3
           npm run build
           npm test
 
