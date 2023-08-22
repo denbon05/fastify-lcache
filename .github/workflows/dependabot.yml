@@ -9,13 +9,14 @@ on:
     types:
       - completed
 
+permissions:
+  pull-requests: write
+  issues: write
+  contents: write
+
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # Set the access for individual scopes
-    permissions:
-      pull-requests: write
-      issues: write
 
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:

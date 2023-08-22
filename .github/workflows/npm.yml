@@ -12,13 +12,27 @@ on:
     types: [created]
 
 jobs:
+  bump:
+    runs-on: ubuntu-latest
+    # allow dependabot to bump the version of the package
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Bumping version
+        uses: jpb06/bump-package@latest
+        with:
+          major-keywords: BREAKING CHANGE
+          minor-keywords: feat,minor
+          patch-keywords: Bump,fix,chore
+          should-default-to-patch: true
+
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "14.x"
+          node-version: ">=14.x"
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
