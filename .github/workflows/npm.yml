@@ -14,8 +14,6 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
-    # allow dependabot to bump the version of the package
-    if: github.actor == 'dependabot[bot]'
 
     steps:
       - name: Bumping version
