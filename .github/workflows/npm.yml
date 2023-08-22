@@ -1,4 +1,4 @@
-name: Publish Package to npmjs
+name: Publish package to npmjs
 
 on:
   workflow_run:
@@ -12,18 +12,6 @@ on:
     types: [created]
 
 jobs:
-  bump:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Bumping version
-        uses: jpb06/bump-package@latest
-        with:
-          major-keywords: BREAKING CHANGE
-          minor-keywords: feat,minor
-          patch-keywords: Bump,fix,chore
-          should-default-to-patch: true
-
   publish:
     runs-on: ubuntu-latest
     steps:
