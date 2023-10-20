@@ -30,7 +30,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=14.x"
+    "node": ">=16.x"
   },
   "peerDependencies": {
     "fastify": ">=3.0.0"
