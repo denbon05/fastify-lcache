@@ -1,5 +1,5 @@
-import { FastifyInstance } from 'fastify';
 import '../lib/types/fastify';
+import { FastifyInstance } from 'fastify';
 import { getApp } from './helpers';
 
 describe('cache', () => {

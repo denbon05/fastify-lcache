@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 export interface IStorageOptions {
   ttl?: number;
 }
