@@ -1,14 +1,14 @@
 {
-  "name": "fastify-lcache",
-  "version": "1.1.5",
+  "name": "fastify-lcache2",
+  "version": "1.1.6",
   "description": "Light cache plugin for fastify",
-  "main": "dist/lcache.js",
-  "types": "lib/types/lcache.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "npx jest",
     "lint": "npx eslint .",
-    "pre-build": "rm -fr dist",
-    "build": "npm run pre-build && npx tsc"
+    "prebuild": "rm -fr dist",
+    "build": "npx tsc"
   },
   "keywords": [
     "fastify",
@@ -17,8 +17,7 @@
     "light-cache"
   ],
   "files": [
-    "dist/**",
-    "lib/types"
+    "dist/**"
   ],
   "repository": {
     "type": "git",
@@ -49,7 +48,8 @@
     "jest": "^28.1.1",
     "ts-jest": "^28.0.4",
     "ts-node": "^10.8.1",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.3",
+    "bun-types": "latest"
   },
   "dependencies": {
     "fastify-plugin": "^3.0.1"

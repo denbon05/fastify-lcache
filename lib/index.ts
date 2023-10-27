@@ -61,9 +61,11 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   _next();
 };
 
+const lcache = fp(cache, {
+  name: '@fastify/lcache',
+});
+
 /**
  * Cache plugin for Fastify
  */
-export default fp(cache, {
-  name: '@fastify/lcache',
-});
+export default lcache;

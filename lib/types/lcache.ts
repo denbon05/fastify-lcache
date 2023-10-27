@@ -1,5 +1,3 @@
-/// <reference types="node" />
-import type { FastifyPluginCallback } from 'fastify';
 import type { IStorageOptions } from './storage';
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -17,10 +15,3 @@ export interface ICacheOptions<> {
   statusesToCache?: number[];
   excludeRoutes?: string[];
 }
-
-declare const _default: FastifyPluginCallback<
-ICacheOptions,
-import('http').Server
->;
-
-export default _default;
