@@ -1,5 +1,5 @@
 {
-  "name": "fastify-lcache2",
+  "name": "fastify-lcache",
   "version": "1.1.6",
   "description": "Light cache plugin for fastify",
   "main": "dist/index.js",
