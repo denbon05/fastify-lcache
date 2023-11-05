@@ -9,6 +9,15 @@ on:
       - main
 
 jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
   build:
     runs-on: ubuntu-latest
 
@@ -17,7 +26,7 @@ jobs:
         node-version: [16.x, 17.x, 18.x, 20.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
