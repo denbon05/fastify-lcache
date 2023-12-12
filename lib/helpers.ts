@@ -22,6 +22,7 @@ export const shouldBeCached = (
   statusCode: number
 ): boolean => {
   const { methodsToCache, statusesToCache, excludeRoutes } = opts;
+  // TODO use routeOptions.url - test compatibility
   const { routerPath, method } = request;
 
   return (
