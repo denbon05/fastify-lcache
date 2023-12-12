@@ -2,7 +2,7 @@ import '../lib/types/fastify';
 import { FastifyInstance } from 'fastify';
 import { getApp } from './helpers';
 
-describe('cache', () => {
+describe('Caching with default options', () => {
   let app: FastifyInstance;
 
   beforeEach(async () => {
