@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 import type { FastifyRequest } from 'fastify';
 import type {
-  RequestMethod,
   ICacheOptions,
   ICachePluginOptions,
+  RequestMethod,
 } from './types/lcache';
 
 const getMilliseconds = (min: number): number => min * 60000;
@@ -22,12 +22,11 @@ export const shouldBeCached = (
   statusCode: number
 ): boolean => {
   const { methodsToCache, statusesToCache, excludeRoutes } = opts;
-  // TODO use routeOptions.url - test compatibility
-  const { routerPath, method } = request;
+  const { routeOptions, method } = request;
 
   return (
     methodsToCache.has(method as RequestMethod) &&
     statusesToCache.has(statusCode) &&
-    !excludeRoutes.has(routerPath)
+    !excludeRoutes.has(routeOptions.url)
   );
 };
