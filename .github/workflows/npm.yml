@@ -5,6 +5,9 @@ on:
     types: [created]
 
 jobs:
+  ci:
+    uses: denbon05/fastify-lcache/.github/workflows/ci.yml@main
+
   publish:
     runs-on: ubuntu-latest
 

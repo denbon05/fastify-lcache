@@ -8,10 +8,6 @@
     "outDir": "dist",
     "resolveJsonModule": true,
     "declaration": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./lib/types"
-    ],
     "types": [
       "node",
       "jest"

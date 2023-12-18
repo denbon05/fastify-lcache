@@ -1,19 +1,18 @@
-name: Node CI
+name: CI
 
 on:
+  workflow_call:
   pull_request:
-    branches:
-      - main
-  push:
     branches:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  run-checks:
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
+        os: [ubuntu-latest]
         # only LTS versions
         node-version: [16.x, 18.x, 20.x]
 
@@ -28,11 +27,12 @@ jobs:
       - run: npm run build
       - run: npm run lint
       - run: npm test
-      - name: Check fastify v3 compatibility
-        run: |
-          npm i -D fastify@3
-          npm run build
-          npm test
+      # TODO uncomment with Fastify v5 dependency
+      # - name: Check fastify v4 compatibility
+      #   run: |
+      #     npm i -D fastify@4
+      #     npm run build
+      #     npm test
 
       - name: Test & publish code coverage
         if: ${{ github.ref == 'refs/heads/main' || github.actor == 'dependabot[bot]' }}

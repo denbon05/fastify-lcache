@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import type { FastifyRequest } from 'fastify';
 import type {
   RequestMethod,
@@ -12,7 +11,7 @@ export const formatOptions = (opts: ICacheOptions): ICachePluginOptions => ({
   ...opts,
   methodsToCache: new Set(opts.methodsToCache),
   statusesToCache: new Set(opts.statusesToCache),
-  excludeRoutes: new Set(opts.excludeRoutes?.map((r) => r.trim())),
+  excludeRoutes: new Set(opts.excludeRoutes?.map((route) => route.trim())),
   ttl: getMilliseconds(opts.ttlInMinutes),
 });
 
@@ -22,12 +21,11 @@ export const shouldBeCached = (
   statusCode: number
 ): boolean => {
   const { methodsToCache, statusesToCache, excludeRoutes } = opts;
-  // TODO use routeOptions.url - test compatibility
-  const { routerPath, method } = request;
+  const { method, routeOptions } = request;
 
   return (
     methodsToCache.has(method as RequestMethod) &&
     statusesToCache.has(statusCode) &&
-    !excludeRoutes.has(routerPath)
+    !excludeRoutes.has(routeOptions.url)
   );
 };

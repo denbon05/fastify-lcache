@@ -4,9 +4,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/6dfec3501aa3eb441bab/test_coverage)](https://codeclimate.com/github/denbon05/fastify-lcache/test_coverage)
 
 <p>fastify-lcache plugin for <a href="https://www.fastify.io/" target="_blank">Fastify</a> for memorize
-data on first request and use next time until <a href="https://en.wikipedia.org/wiki/Time_to_live"  target="_blank">ttl</a> expires</p>
-
-<p>Supports Fastify version since ^3</p>
+data on first request and use it next time until <a href="https://en.wikipedia.org/wiki/Time_to_live"  target="_blank">ttl</a> expires</p>
 
 ```bash
 npm i fastify-lcache
@@ -49,7 +47,7 @@ axios.get(url);
 ```
 
 <dl>
-<dt><b>IMPORTANT</b></dt>
+<dt><b>⚠️ IMPORTANT</b></dt>
 <dd><i>Restarting your app resets the cache</i></dd>
 </dl>
 
@@ -72,9 +70,6 @@ axios.get(url);
 <p><b>app.lcache</b> available inside your app</p>
 
 ```ts
-// you can specify payload data type:
-// app.lcache.get<{ name: string }>('person')
-
 interface CachedResponse<T> {
   payload: T;
   headers?: { [key: string]: string | number | string[] };
@@ -98,3 +93,10 @@ interface IStorage {
   destroy(): void;
 }
 ```
+
+### Fastify version compatibility
+
+| Fastify | lcache |
+| :-----: | :----: |
+|  3-4.9  | 1-1.2  |
+|  ^4.10  |  2.x   |
