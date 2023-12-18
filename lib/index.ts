@@ -63,6 +63,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
 const lcache = fp(cache, {
   name: '@fastify/lcache',
+  fastify: '>=4.10',
 });
 
 /**
