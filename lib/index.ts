@@ -3,6 +3,7 @@ import fp from 'fastify-plugin';
 import type { ICacheOptions } from './types/lcache';
 import { formatOptions, shouldBeCached } from './helpers';
 import MapStorage from './storage/Map';
+import { buildCacheKey } from './utils';
 
 const defaultOpts: ICacheOptions = {
   ttlInMinutes: 5,
@@ -25,14 +26,14 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   const storage = new MapStorage(storageOpts);
 
   instance.addHook('onSend', async (request, reply, payload) => {
-    const { url, method } = request;
-    const requestId = url + method;
+    const cacheKey = buildCacheKey(request);
 
-    if (
-      !storage.has(requestId) &&
-      shouldBeCached(storageOpts, request, reply.statusCode)
-    ) {
-      storage.set(requestId, {
+    const shouldDataBePlacedInCache =
+      !storage.has(cacheKey) &&
+      shouldBeCached(storageOpts, request, reply.statusCode);
+
+    if (shouldDataBePlacedInCache) {
+      storage.set(cacheKey, {
         payload,
         headers: reply.getHeaders(),
         statusCode: reply.statusCode,
@@ -40,11 +41,11 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     }
   });
 
-  instance.addHook('onRequest', async ({ url, method }, reply) => {
-    const requestId = url + method;
+  instance.addHook('onRequest', async (request, reply) => {
+    const cacheKey = buildCacheKey(request);
 
-    if (storage.has(requestId)) {
-      const { headers, payload, statusCode } = storage.get(requestId);
+    if (storage.has(cacheKey)) {
+      const { headers, payload, statusCode } = storage.get(cacheKey);
       reply.headers(headers);
       reply.status(statusCode);
       reply.send(payload);

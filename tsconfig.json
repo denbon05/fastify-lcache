@@ -8,17 +8,12 @@
     "outDir": "dist",
     "resolveJsonModule": true,
     "declaration": true,
-    "types": [
-      "node",
-      "jest"
-    ]
+    "paths": {
+      "@/*": ["./lib/*"]
+    },
+    "types": ["node", "jest"]
   },
-  "include": [
-    "lib/**/*.ts"
-  ],
-  "exclude": [
-    "__tests__/**/*.ts"
-  ],
+  "include": ["lib/**/*.ts", "__tests__/**/*.ts"],
   "ts-node": {
     "moduleTypes": {
       "jest.config.ts": "cjs"

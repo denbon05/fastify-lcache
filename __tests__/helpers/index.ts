@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
+import type { ICacheOptions } from '@/types/lcache';
 import fastify from 'fastify';
 import lcache from '../../lib';
-import { ICacheOptions } from '../../lib/types/lcache';
 
 export const getApp = (options: ICacheOptions = {}) => {
   const app = fastify();

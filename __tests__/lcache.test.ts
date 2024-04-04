@@ -1,5 +1,5 @@
-import '../lib/types/fastify';
-import { FastifyInstance } from 'fastify';
+import '@/types/fastify';
+import type { FastifyInstance } from 'fastify';
 import { getApp } from './helpers';
 
 describe('Caching with default options', () => {
@@ -30,7 +30,7 @@ describe('Caching with default options', () => {
 
     const res2 = await getPing();
     expect(res2.body).toBe('pong');
-    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   test('Cache should return same headers as the original request', async () => {
