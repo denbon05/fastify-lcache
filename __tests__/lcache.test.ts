@@ -1,5 +1,5 @@
-import '../lib/types/fastify';
-import { FastifyInstance } from 'fastify';
+import '@/types/fastify';
+import type { FastifyInstance } from 'fastify';
 import { getApp } from './helpers';
 
 describe('Caching with default options', () => {
@@ -18,7 +18,8 @@ describe('Caching with default options', () => {
   });
 
   test('Cache is working', async () => {
-    const spy = jest.spyOn(app.lcache, 'get');
+    const spyGet = jest.spyOn(app.lcache, 'get');
+    const spySet = jest.spyOn(app.lcache, 'set');
     const getPing = async () =>
       app.inject({
         method: 'GET',
@@ -27,14 +28,17 @@ describe('Caching with default options', () => {
 
     const res1 = await getPing();
     expect(res1.body).toBe('pong');
+    expect(spySet).toHaveBeenCalledTimes(1);
 
     const res2 = await getPing();
+    // `set` shouldn't be called again
+    expect(spySet).toHaveBeenCalledTimes(1);
     expect(res2.body).toBe('pong');
-    expect(spy).toHaveBeenCalled();
+    expect(spyGet).toHaveBeenCalledTimes(1);
   });
 
   test('Cache should return same headers as the original request', async () => {
-    const spy = jest.spyOn(app.lcache, 'get');
+    const spyGet = jest.spyOn(app.lcache, 'get');
     const getJson = async () =>
       app.inject({
         method: 'GET',
@@ -45,7 +49,7 @@ describe('Caching with default options', () => {
     const res2 = await getJson();
 
     expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
-    expect(spy).toHaveBeenCalled();
+    expect(spyGet).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -56,6 +60,7 @@ describe('Caching with custom options', () => {
     app = await getApp({
       excludeRoutes: ['/date'],
       statusesToCache: [200, 201],
+      methodsToCache: ['GET', 'POST'],
     });
   });
 
@@ -63,7 +68,9 @@ describe('Caching with custom options', () => {
     await app.close();
   });
 
-  test('POST method should not be cached', async () => {
+  test('Response should be cached separately for different payload', async () => {
+    const spyGet = jest.spyOn(app.lcache, 'get');
+    const spySet = jest.spyOn(app.lcache, 'set');
     const res1 = await app.inject({
       method: 'POST',
       path: '/post',
@@ -81,9 +88,12 @@ describe('Caching with custom options', () => {
     });
 
     expect(res1.body).not.toBe(res2.body);
+    expect(spyGet).not.toHaveBeenCalled();
+    expect(spySet).toHaveBeenCalledTimes(2);
   });
 
   test('Excluded routes should not be cached', async () => {
+    const spySet = jest.spyOn(app.lcache, 'set');
     const res1 = await app.inject({
       method: 'GET',
       path: '/date',
@@ -95,9 +105,11 @@ describe('Caching with custom options', () => {
     });
 
     expect(res1.body).not.toBe(res2.body);
+    expect(spySet).not.toHaveBeenCalled();
   });
 
-  test('Method PUT should not be cached when only status code is 201', async () => {
+  test('PUT method should not be cached when only status code is 201', async () => {
+    const spySet = jest.spyOn(app.lcache, 'set');
     const res1 = await app.inject({
       method: 'PUT',
       path: '/put',
@@ -115,5 +127,6 @@ describe('Caching with custom options', () => {
     });
 
     expect(res1.body).not.toBe(res2.body);
+    expect(spySet).not.toHaveBeenCalled();
   });
 });
