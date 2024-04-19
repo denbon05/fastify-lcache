@@ -1,8 +1,8 @@
 import type { FastifyRequest } from 'fastify';
 import type {
-  RequestMethod,
   ICacheOptions,
   ICachePluginOptions,
+  RequestMethod,
 } from './types/lcache';
 
 const getMilliseconds = (min: number): number => min * 60000;
@@ -15,7 +15,7 @@ export const formatOptions = (opts: ICacheOptions): ICachePluginOptions => ({
   ttl: getMilliseconds(opts.ttlInMinutes),
 });
 
-export const shouldBeCached = (
+export const checkShouldBeCached = (
   opts: ICachePluginOptions,
   request: FastifyRequest,
   statusCode: number

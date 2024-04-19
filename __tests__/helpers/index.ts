@@ -12,6 +12,14 @@ export const getApp = (options: ICacheOptions = {}) => {
       reply.send('pong');
     });
 
+    app.post('/ping', async (_req, reply) => {
+      reply.send('pong');
+    });
+
+    app.delete('/ping', async (_req, reply) => {
+      reply.send('pong');
+    });
+
     app.get('/json', async (_req, reply) => {
       reply.send({ hello: 'world' });
     });
