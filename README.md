@@ -53,35 +53,17 @@ axios.get(url);
 
 ## API
 
-### Options (default)
-
-```ts
-{
-  ttlInMinutes?: 5,
-  disableCache?: false;
-  statusesToCache?: [200],
-  methodsToCache?: ['GET'],
-  excludeRoutes?: [];
-}
-```
-
 ### On fastify instance
 
 <p><b>app.lcache</b> available inside your app</p>
 
 ```ts
-interface CachedResponse<T> {
-  payload: T;
-  headers?: { [key: string]: string | number | string[] };
-  statusCode?: number;
-}
-
 interface IStorage {
   // Get cached data
-  get<T>(key: string): CachedResponse<T>;
+  get(key: string): any;
 
   // Set data to cache
-  set<T>(key: string, value: CachedResponse<T>): void;
+  set(key: string, value: any): void;
 
   // Check if data exists in cache
   has(key: string): boolean;

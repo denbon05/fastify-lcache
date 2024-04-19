@@ -1,14 +1,9 @@
-import type { Config } from 'jest';
+import type { JestConfigWithTsJest } from 'ts-jest';
 
-const jestConfig: Config = {
+const jestConfig: JestConfigWithTsJest = {
   rootDir: '.',
   testEnvironment: 'node',
   transform: { '^.+\\.ts?$': 'ts-jest' },
-  globals: {
-    'ts-jest': {
-      diagnostics: false,
-    },
-  },
   moduleFileExtensions: ['js', 'ts', 'd.ts'],
   testRegex: '.*\\.test\\.ts$',
   modulePathIgnorePatterns: ['<rootDir>/__tests__/helpers/'],

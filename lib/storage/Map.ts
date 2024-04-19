@@ -1,12 +1,10 @@
-import type {
-  Src,
-  SrcMeta,
-  IStorage,
-  IStorageOptions,
-  CachedResponse,
-} from '../types/storage';
+import { TLL_CHECK_INTERVAL_MS } from '@/constants';
+import type { IStorage, IStorageOptions, Src, SrcMeta } from '../types/Storage';
 
 export default class Storage implements IStorage {
+  /** How often check the outdated cached data in ms */
+  private ttlCheckIntervalMs = TLL_CHECK_INTERVAL_MS;
+
   private src: Src = new Map();
 
   private options: IStorageOptions;
@@ -15,16 +13,16 @@ export default class Storage implements IStorage {
 
   private intervalId: ReturnType<typeof setInterval>;
 
-  private initCacheCleaner() {
+  private initCacheCleaner = () => {
     this.intervalId = setInterval(() => {
       this.srcMeta.forEach(({ updatedAt }, key) => {
         const isTtlOutdate = Date.now() - updatedAt > this.options.ttl;
         if (isTtlOutdate) {
-          this.src.delete(key);
+          this.reset(key);
         }
       });
-    }, 15000);
-  }
+    }, this.ttlCheckIntervalMs);
+  };
 
   /**
    * Init storage options
@@ -34,44 +32,34 @@ export default class Storage implements IStorage {
     this.initCacheCleaner();
   }
 
-  /**
-   * Get cached data
-   */
-  public get<T>(key: string): CachedResponse<T> {
-    return this.src.get(key);
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get = (key: string): any => this.src.get(key);
 
-  /**
-   * Set data to cache
-   */
-  public set<T>(key: string, value: CachedResponse<T>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public set = (key: string, value: any): void => {
     this.src.set(key, value);
     this.srcMeta.set(key, { updatedAt: Date.now() });
-  }
+  };
 
-  /**
-   * Check if data exists in cache
-   */
-  public has(key: string): boolean {
-    return this.src.has(key);
-  }
+  public has = (key: string): boolean => this.src.has(key);
 
-  /**
-   * Clear all data in cache if key not specified
-   * @param key? string
-   */
-  public reset(key?: string): void {
-    if (key) {
+  public reset = (key?: string | string[]): void => {
+    if (typeof key === 'string') {
       this.src.delete(key);
       return;
     }
-    this.src.clear();
-  }
 
-  /**
-   * Clear Interval which check data lifetime
-   */
-  public destroy(): void {
+    if (Array.isArray(key)) {
+      key.forEach((k) => {
+        this.src.delete(k);
+      });
+      return;
+    }
+
+    this.src.clear();
+  };
+
+  public destroy = (): void => {
     clearInterval(this.intervalId);
-  }
+  };
 }

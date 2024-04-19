@@ -6,8 +6,10 @@ const hashValue = (text: unknown): string =>
   createHash('sha256').update(JSON.stringify(text)).digest('hex');
 
 export const buildCacheKey = (req: FastifyRequest) => {
-  const { url, method, body } = req;
+  const { url, method, body, query } = req;
 
-  // if there is a body - add it to the cache key
-  return body ? `${url}-${method}-${hashValue(body)}` : `${url}-${method}`;
+  // try to get payload in order to specify request cache key
+  const payload = body || query || '';
+
+  return `${url}-${method}-${hashValue(payload)}`;
 };
