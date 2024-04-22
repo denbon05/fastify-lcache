@@ -53,6 +53,19 @@ axios.get(url);
 
 ## API
 
+### Options (default)
+
+```ts
+{
+  ttlInMinutes?: 5,
+  disableCache?: false,
+  statusesToCache?: [200],
+  methodsToCache?: ['GET'],
+  excludeRoutes?: [],
+  ttlCheckIntervalMs?: 1000,
+}
+```
+
 ### On fastify instance
 
 <p><b>app.lcache</b> available inside your app</p>
