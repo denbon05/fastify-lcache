@@ -1,32 +1,34 @@
-import { checkShouldBeCached, formatOptions } from '@/helpers';
+import * as constants from '@/constants';
+import { formatOptions, shouldDataBeCached } from '@/helpers';
 import MapStorage from '@/storage/Map';
 import type { ICacheOptions } from '@/types/lcache';
 import { buildCacheKey } from '@/utils';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
-import * as constants from '@/constants';
 
 const defaultOpts: ICacheOptions = {
   ttlInMinutes: constants.TTL_IN_MINUTES,
   statusesToCache: constants.STATUSES_TO_CACHE,
   methodsToCache: constants.METHODS_TO_CACHE,
-  ttlCheckIntervalMs: constants.TLL_CHECK_INTERVAL_MS,
 };
 
 const cache: FastifyPluginCallback<ICacheOptions> = (
   instance: FastifyInstance,
   opts: ICacheOptions,
-  _next
+  next
 ) => {
-  const storageOpts = formatOptions({ ...defaultOpts, ...opts });
+  const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
 
-  const storage = new MapStorage(storageOpts);
+  const storage = new MapStorage({
+    ttl: pluginOpts.ttl,
+    ttlCheckIntervalMs: pluginOpts.ttl,
+  });
 
   instance.addHook('onSend', async (request, reply, payload) => {
     const cacheKey = buildCacheKey(request);
     const shouldValueBeCached =
       !storage.has(cacheKey) &&
-      checkShouldBeCached(storageOpts, request, reply.statusCode) &&
+      shouldDataBeCached(pluginOpts, request, reply.statusCode) &&
       !opts.disableCache;
 
     if (shouldValueBeCached) {
@@ -56,7 +58,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
   instance.decorate('lcache', storage);
 
-  _next();
+  next();
 };
 
 const lcache = fp(cache, {

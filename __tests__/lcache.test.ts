@@ -1,4 +1,3 @@
-import { TLL_CHECK_INTERVAL_MS } from '@/constants';
 import '@/types/fastify';
 import type { RequestMethod } from '@/types/lcache';
 import type { FastifyInstance } from 'fastify';
@@ -270,30 +269,53 @@ describe('Disabled lcache plugin', () => {
   );
 });
 
-describe('Interval cleanup', () => {
+describe('TTL', () => {
+  const TLL_CHECK_INTERVAL_MS = 1500;
+  const msToWait = TLL_CHECK_INTERVAL_MS * 3;
   // convert to minutes for lcache usage
   const ttlInMinutes = TLL_CHECK_INTERVAL_MS / 60000;
   let app: FastifyInstance;
 
-  beforeEach(async () => {
-    app = await getApp({
-      ttlInMinutes,
-    });
+  beforeEach(() => {
+    // increase timeout of the tests
+    jest.setTimeout(msToWait * 4);
   });
 
   afterEach(async () => {
     await app.close();
-    jest.clearAllTimers();
   });
 
-  test('Cached data should be removed after ttl', async () => {
+  test('Cached data should be removed after ttl - timeout', async () => {
+    app = await getApp({
+      ttlInMinutes,
+    });
+
     const key = 'someKey';
     const value = 'someValue';
 
     app.lcache.set(key, value);
-    // wait doubled ttl time
+    // wait increased ttl time
     await new Promise((resolve) => {
-      setTimeout(resolve, TLL_CHECK_INTERVAL_MS * 2);
+      setTimeout(resolve, msToWait);
+    });
+
+    expect(app.lcache.get(key)).toBeUndefined();
+    expect(app.lcache.has(key)).toBeFalsy();
+  });
+
+  test('Cached data should be removed after ttl - interval', async () => {
+    app = await getApp({
+      ttlInMinutes,
+      ttlCheckIntervalMs: TLL_CHECK_INTERVAL_MS,
+    });
+
+    const key = 'someKey';
+    const value = 'someValue';
+
+    app.lcache.set(key, value);
+    // wait increased ttl time
+    await new Promise((resolve) => {
+      setTimeout(resolve, msToWait);
     });
 
     expect(app.lcache.get(key)).toBeUndefined();
