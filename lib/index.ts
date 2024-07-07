@@ -15,7 +15,7 @@ const defaultOpts: ICacheOptions = {
 const cache: FastifyPluginCallback<ICacheOptions> = (
   instance: FastifyInstance,
   opts: ICacheOptions,
-  done
+  next
 ) => {
   const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
 
@@ -58,7 +58,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
   instance.decorate('lcache', storage);
 
-  done();
+  next();
 };
 
 const lcache = fp(cache, {
