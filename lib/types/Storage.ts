@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IStorageOptions {
   ttl?: number;
+  ttlCheckIntervalMs?: number;
 }
+
+export type StorageWatcherMethod = 'interval' | 'timeout';
 
 export type Src = Map<string, any>;
 export type SrcMeta = Map<string, { updatedAt: number }>;

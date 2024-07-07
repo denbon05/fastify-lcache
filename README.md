@@ -62,7 +62,6 @@ axios.get(url);
   statusesToCache?: [200],
   methodsToCache?: ['GET'],
   excludeRoutes?: [],
-  ttlCheckIntervalMs?: 1000,
 }
 ```
 

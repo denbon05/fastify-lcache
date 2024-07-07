@@ -15,7 +15,7 @@ export const formatOptions = (opts: ICacheOptions): ICachePluginOptions => ({
   ttl: getMilliseconds(opts.ttlInMinutes),
 });
 
-export const checkShouldBeCached = (
+export const shouldDataBeCached = (
   opts: ICachePluginOptions,
   request: FastifyRequest,
   statusCode: number
