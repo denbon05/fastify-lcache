@@ -13,12 +13,12 @@ export interface IStorage {
   /**
    * Get cached data
    */
-  get(key: string): any;
+  get<T>(key: string): T;
 
   /**
    * Set data to cache
    */
-  set(key: string, value: any): void;
+  set<T>(key: string, value: T): void;
 
   /**
    * Check if data exists in cache
