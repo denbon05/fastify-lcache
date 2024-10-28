@@ -48,8 +48,9 @@ describe('Caching with default options', () => {
   });
 
   test('Cache should work', async () => {
-    const spyGet = jest.spyOn(app.lcache, 'get');
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spyGet = jest.spyOn(app.lcache.storage, 'get');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
+    const expectedValue = 'pong';
     const getPing = async () =>
       app.inject({
         method: 'GET',
@@ -57,18 +58,18 @@ describe('Caching with default options', () => {
       });
 
     const res1 = await getPing();
-    expect(res1.body).toBe('pong');
+    expect(res1.body).toBe(expectedValue);
     expect(spySet).toHaveBeenCalledTimes(1);
 
     const res2 = await getPing();
     // `set` shouldn't be called again
     expect(spySet).toHaveBeenCalledTimes(1);
-    expect(res2.body).toBe('pong');
+    expect(res2.body).toBe(expectedValue);
     expect(spyGet).toHaveBeenCalledTimes(1);
   });
 
   test('Cache should return same headers as the original request', async () => {
-    const spyGet = jest.spyOn(app.lcache, 'get');
+    const spyGet = jest.spyOn(app.lcache.storage, 'get');
     const getJson = async () =>
       app.inject({
         method: 'GET',
@@ -83,8 +84,8 @@ describe('Caching with default options', () => {
   });
 
   test('Response should be cached separately for different query', async () => {
-    const spyGet = jest.spyOn(app.lcache, 'get');
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spyGet = jest.spyOn(app.lcache.storage, 'get');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
     const res1 = await app.inject({
       method: 'GET',
       path: '/date',
@@ -119,8 +120,8 @@ describe('Caching with custom options', () => {
   });
 
   test('Response should be cached separately for different body', async () => {
-    const spyGet = jest.spyOn(app.lcache, 'get');
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spyGet = jest.spyOn(app.lcache.storage, 'get');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
     const res1 = await app.inject({
       method: 'POST',
       path: '/post',
@@ -143,7 +144,7 @@ describe('Caching with custom options', () => {
   });
 
   test('Excluded routes should not be cached', async () => {
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
     const res1 = await app.inject({
       method: 'GET',
       path: '/date',
@@ -159,7 +160,7 @@ describe('Caching with custom options', () => {
   });
 
   test('PUT method should not be cached when only status code is 201', async () => {
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
     const res1 = await app.inject({
       method: 'PUT',
       path: '/put',
@@ -181,7 +182,7 @@ describe('Caching with custom options', () => {
   });
 
   test('Cache reset should work', async () => {
-    const spySet = jest.spyOn(app.lcache, 'set');
+    const spySet = jest.spyOn(app.lcache.storage, 'set');
     const getPing = async () =>
       app.inject({
         method: 'GET',
@@ -226,7 +227,7 @@ describe('Caching with custom options', () => {
     expect(app.lcache.get(dataKey2)).toBeUndefined();
 
     // check cached data via request
-    const spyGet = jest.spyOn(app.lcache, 'get');
+    const spyGet = jest.spyOn(app.lcache.storage, 'get');
     await getPing();
     await postPing();
     // lcache should place data again to the cache and not try to get it
@@ -254,7 +255,7 @@ describe('Disabled lcache plugin', () => {
   test.each(methodsToCache)(
     "Shouldn't cache %s method regardless plugin config",
     async (httpMethod) => {
-      const spySet = jest.spyOn(app.lcache, 'set');
+      const spySet = jest.spyOn(app.lcache.storage, 'set');
 
       await app.inject({
         method: httpMethod,
@@ -306,7 +307,6 @@ describe('TTL', () => {
   test('Cached data should be removed after ttl - interval', async () => {
     app = await getApp({
       ttlInMinutes,
-      ttlCheckIntervalMs: TLL_CHECK_INTERVAL_MS,
     });
 
     const key = 'someKey';

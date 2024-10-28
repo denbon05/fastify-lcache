@@ -70,12 +70,12 @@ axios.get(url);
 <p><b>app.lcache</b> available inside your app</p>
 
 ```ts
-interface IStorage {
+interface ILightCache {
   // Get cached data
-  get(key: string): any;
+  get<T>(key: string): T;
 
   // Set data to cache
-  set(key: string, value: any): void;
+  set<T>(key: string, value: T): void;
 
   // Check if data exists in cache
   has(key: string): boolean;

@@ -1,11 +1,11 @@
-import type { IStorageOptions } from './Storage';
+import type { IStorage, IStorageOptions } from './storage';
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 export interface ICachePluginOptions extends IStorageOptions {
-  methodsToCache?: Set<RequestMethod>;
-  statusesToCache?: Set<number>;
-  excludeRoutes?: Set<string>;
+  methodsToCache: Set<RequestMethod>;
+  statusesToCache: Set<number>;
+  excludeRoutes: Set<string>;
 }
 
 export interface ICacheOptions {
@@ -33,11 +33,37 @@ export interface ICacheOptions {
    * @default []
    */
   excludeRoutes?: string[];
+}
 
-  /** How often check the outdated cached data in ms
-   * @since v2.1.0
-   * @experimental
-   * By default removes data based on the timeout between cached keys
+export interface ILightCache {
+  /**
+   * Internal storage instance
    */
-  ttlCheckIntervalMs?: number;
+  storage: IStorage;
+
+  /**
+   * Get cached data
+   */
+  get<T>(key: string): T | undefined;
+
+  /**
+   * Set data to cache.
+   */
+  set<T>(key: string, value: T): void;
+
+  /**
+   * Check if data exists in cache
+   */
+  has(key: string): boolean;
+
+  /**
+   * Clear all data in cache if key not specified
+   * @param key? string
+   */
+  reset(key?: string | string[]): void;
+
+  /**
+   * Clear Interval which check data lifetime
+   */
+  destroy(): void;
 }
