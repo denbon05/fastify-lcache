@@ -1,9 +1,9 @@
-import { formatOptions, shouldDataBeCached } from '@/helpers';
-import MapStorage from '@/storage/Map';
-import type { ICacheOptions } from '@/types/lcache';
-import { buildCacheKey } from '@/utils';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
+import { formatOptions, shouldDataBeCached } from './helpers';
+import MapStorage from './storage/Map';
+import type { ICacheOptions } from './types/lcache';
+import { buildCacheKey } from './utils';
 import * as constants from './constants';
 
 const defaultOpts: ICacheOptions = {
