@@ -1,27 +1,31 @@
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
+import * as constants from './constants';
 import { formatOptions, shouldDataBeCached } from './helpers';
-import MapStorage from './storage/Map';
+import MapStorage from './models/MapStorage';
 import type { ICacheOptions } from './types/lcache';
 import { buildCacheKey } from './utils';
-import * as constants from './constants';
+import { LightCache } from './models/LightCache';
 
-const defaultOpts: ICacheOptions = {
+// all default options goes here
+const defaultOpts: Required<ICacheOptions> = {
   ttlInMinutes: constants.TTL_IN_MINUTES,
   statusesToCache: constants.STATUSES_TO_CACHE,
   methodsToCache: constants.METHODS_TO_CACHE,
+  excludeRoutes: [],
+  disableCache: false,
 };
 
 const cache: FastifyPluginCallback<ICacheOptions> = (
   instance: FastifyInstance,
-  opts: ICacheOptions,
+  // eslint-disable-next-line default-param-last
+  opts: ICacheOptions = {},
   next
 ) => {
   const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
 
   const storage = new MapStorage({
-    ttl: pluginOpts.ttl,
-    ttlCheckIntervalMs: pluginOpts.ttl,
+    ttlInMs: pluginOpts.ttlInMs,
   });
 
   instance.addHook('onSend', async (request, reply, payload) => {
@@ -45,8 +49,13 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
 
     if (storage.has(cacheKey)) {
       const { headers, payload, statusCode } = storage.get(cacheKey);
-      reply.headers(headers);
-      reply.status(statusCode);
+      // prepare reply and send saved payload
+      if (headers) {
+        reply.headers(headers);
+      }
+      if (statusCode) {
+        reply.status(statusCode);
+      }
       reply.send(payload);
     }
   });
@@ -56,7 +65,8 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     done();
   });
 
-  instance.decorate('lcache', storage);
+  const lcacheInstance = new LightCache(storage);
+  instance.decorate('lcache', lcacheInstance);
 
   next();
 };

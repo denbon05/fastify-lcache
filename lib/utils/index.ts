@@ -1,13 +1,15 @@
-/* eslint-disable import/prefer-default-export */
-import type { FastifyRequest } from 'fastify';
+import type { BuildCacheKeyParam } from '@/types/cached-key';
 import { createHash } from 'node:crypto';
 
 const hashValue = (text: unknown): string =>
   createHash('sha256').update(JSON.stringify(text)).digest('hex');
 
-export const buildCacheKey = (req: FastifyRequest) => {
-  const { url, method, body, query } = req;
-
+export const buildCacheKey = ({
+  url,
+  method,
+  body,
+  query,
+}: BuildCacheKeyParam) => {
   // try to get payload in order to specify request cache key
   const payload = body || query || '';
 
