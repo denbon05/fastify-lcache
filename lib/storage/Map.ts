@@ -3,8 +3,8 @@ import type {
   IStorageOptions,
   Src,
   SrcMeta,
-  StoredData,
-} from '../types/storage';
+  StorageWatcherMethod,
+} from '../types/Storage';
 
 export default class Storage implements IStorage {
   private src: Src = new Map();
@@ -13,20 +13,34 @@ export default class Storage implements IStorage {
 
   private srcMeta: SrcMeta = new Map();
 
-  private timeoutId?: NodeJS.Timeout;
+  private timeoutId: NodeJS.Timeout;
+
+  private watcherMethod: StorageWatcherMethod = 'timeout';
 
   /** Is timeout watcher enabled */
   private isWatcherEnabled = false;
 
+  /** @experimental Could be deprecated in the future releases */
+  private initCacheCleaner = () => {
+    this.timeoutId = setInterval(() => {
+      this.srcMeta.forEach(({ updatedAt }, key) => {
+        const isTTLOutdated = Date.now() - updatedAt > this.options.ttl;
+        if (isTTLOutdated) {
+          this.reset(key);
+        }
+      });
+    }, this.options.ttlCheckIntervalMs);
+  };
+
   /** Watch cached data based on timeout range between cached values */
   private watchOutdated = () => {
     // initial values
-    let minDiff = 0;
+    let minDiff = Infinity;
     // most recent outdated key
     let recentOutdatedKey: string;
     this.srcMeta.forEach(({ updatedAt }, key) => {
-      const diff = Date.now() + this.options.ttlInMs - updatedAt;
-      if (!minDiff || diff < minDiff) {
+      const diff = this.options.ttl - updatedAt;
+      if (diff < minDiff) {
         minDiff = diff;
         recentOutdatedKey = key;
       }
@@ -47,19 +61,27 @@ export default class Storage implements IStorage {
    * @param {IStorageOptions} options Init storage options
    */
   public constructor(options: IStorageOptions) {
-    this.options = { ...options };
+    this.options = { ...this.options, ...options };
+
+    if (typeof this.options.ttlCheckIntervalMs !== 'undefined') {
+      this.watcherMethod = 'interval';
+      // watch cached value by interval value provided by client
+      this.initCacheCleaner();
+    }
   }
 
-  public get = <T>(key: string): StoredData<T> => this.src.get(key) ?? {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get = (key: string): any => this.src.get(key);
 
-  public set = <T>(key: string, value: StoredData<T>): void => {
-    this.src.set(key, value);
-    this.srcMeta.set(key, { updatedAt: Date.now() });
-
-    if (!this.isWatcherEnabled) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public set = (key: string, value: any): void => {
+    if (this.watcherMethod === 'timeout' && !this.isWatcherEnabled) {
       // enable watcher of outdated data
       this.watchOutdated();
     }
+
+    this.src.set(key, value);
+    this.srcMeta.set(key, { updatedAt: Date.now() });
   };
 
   public has = (key: string): boolean => this.src.has(key);
