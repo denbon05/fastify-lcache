@@ -1,10 +1,10 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'fastify';
-import type { ILightCache } from './lcache';
+import type { IStorage } from './Storage';
 
 // extend fastify instance type on install package
 declare module 'fastify' {
   interface FastifyInstance {
-    lcache: ILightCache;
+    lcache: IStorage;
   }
 }
