@@ -1,324 +1,293 @@
 import '@/types/fastify';
 import type { RequestMethod } from '@/types/lcache';
 import type { FastifyInstance } from 'fastify';
-import { getApp } from './helpers';
+import { getApp, spies } from './helpers';
 
-describe('Caching with default options', () => {
+describe('Light Cache Fastify plugin', () => {
   let app: FastifyInstance;
 
-  beforeEach(async () => {
-    app = await getApp();
-  });
-
   afterEach(async () => {
+    jest.clearAllMocks();
     await app.close();
   });
 
-  test('Plugin should exist on app instance', () => {
-    expect(app.hasDecorator('lcache')).toBeTruthy();
-  });
+  describe('Caching with default options', () => {
+    beforeEach(async () => {
+      app = await getApp();
+    });
 
-  test('Should be possible to put/retrieve values from app instance', async () => {
-    const strKey = 'str';
-    const expectedStrValue = 'data1';
-    const objKey = 'obj';
-    const expectedObjValue = {
-      name: 'Bob',
-      age: 23,
-    };
-    app.lcache.set(strKey, expectedStrValue);
-    app.lcache.set(objKey, expectedObjValue);
+    test('Plugin should exist on app instance', () => {
+      expect(app.hasDecorator('lcache')).toBeTruthy();
+    });
 
-    const actualStrValue = app.lcache.get(strKey);
-    expect(actualStrValue).toEqual(expectedStrValue);
+    test('Should be possible to put/retrieve values from app instance', () => {
+      const strKey = 'str';
+      const expectedStrValue = 'data1';
+      const objKey = 'obj';
+      const expectedObjValue = {
+        name: 'Bob',
+        age: 23,
+      };
+      app.lcache.set(strKey, expectedStrValue);
+      app.lcache.set(objKey, expectedObjValue);
 
-    const actualObjValue = app.lcache.get(objKey);
-    expect(actualObjValue).toEqual(actualObjValue);
-  });
+      const actualStrValue = app.lcache.get(strKey);
+      expect(actualStrValue).toEqual(expectedStrValue);
 
-  test('Should be possible to overwrite data by key', async () => {
-    const key = 'str';
-    const value1 = 'data1';
-    const value2 = NaN;
+      const actualObjValue = app.lcache.get(objKey);
+      expect(actualObjValue).toEqual(actualObjValue);
+    });
 
-    app.lcache.set(key, value1);
-    app.lcache.set(key, value2);
+    test('Should be possible to overwrite data by key', () => {
+      const key = 'str';
+      const value1 = 'data1';
+      const value2 = NaN;
 
-    expect(app.lcache.get(key)).toStrictEqual(value2);
-  });
+      app.lcache.set(key, value1);
+      app.lcache.set(key, value2);
 
-  test('Cache should work', async () => {
-    const spyGet = jest.spyOn(app.lcache.storage, 'get');
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const expectedValue = 'pong';
-    const getPing = async () =>
-      app.inject({
+      expect(app.lcache.get(key)).toStrictEqual(value2);
+    });
+
+    test('Cache should work', async () => {
+      const expectedValue = 'pong';
+      const getPing = async () =>
+        app.inject({
+          method: 'GET',
+          path: '/ping',
+        });
+
+      const res1 = await getPing();
+      expect(res1.body).toBe(expectedValue);
+      // reaches actual endpoint
+      expect(spies.getPing).toHaveBeenCalledTimes(1);
+
+      // cached data
+      const res2 = await getPing();
+      // expect endpoint no longer reachable, data coming from cache
+      expect(spies.getPing).toHaveBeenCalledTimes(1);
+      expect(res2.body).toBe(expectedValue);
+    });
+
+    test('Cache should return same headers as the original request', async () => {
+      const getJson = async () =>
+        app.inject({
+          method: 'GET',
+          path: '/json',
+        });
+
+      const res1 = await getJson();
+      const res2 = await getJson();
+
+      expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
+      // endpoint reached only once
+      expect(spies.getJSON).toHaveBeenCalledTimes(1);
+    });
+
+    test('Response should be cached separately for different query', async () => {
+      const res1 = await app.inject({
         method: 'GET',
-        path: '/ping',
+        path: '/date',
+        query: 'asd',
       });
 
-    const res1 = await getPing();
-    expect(res1.body).toBe(expectedValue);
-    expect(spySet).toHaveBeenCalledTimes(1);
-
-    const res2 = await getPing();
-    // `set` shouldn't be called again
-    expect(spySet).toHaveBeenCalledTimes(1);
-    expect(res2.body).toBe(expectedValue);
-    expect(spyGet).toHaveBeenCalledTimes(1);
-  });
-
-  test('Cache should return same headers as the original request', async () => {
-    const spyGet = jest.spyOn(app.lcache.storage, 'get');
-    const getJson = async () =>
-      app.inject({
+      const res2 = await app.inject({
         method: 'GET',
-        path: '/json',
+        path: '/date',
+        query: 'sdf',
       });
 
-    const res1 = await getJson();
-    const res2 = await getJson();
-
-    expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
-    expect(spyGet).toHaveBeenCalledTimes(1);
-  });
-
-  test('Response should be cached separately for different query', async () => {
-    const spyGet = jest.spyOn(app.lcache.storage, 'get');
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const res1 = await app.inject({
-      method: 'GET',
-      path: '/date',
-      query: 'asd',
-    });
-
-    const res2 = await app.inject({
-      method: 'GET',
-      path: '/date',
-      query: 'sdf',
-    });
-
-    expect(res1.body).not.toBe(res2.body);
-    expect(spyGet).not.toHaveBeenCalled();
-    expect(spySet).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('Caching with custom options', () => {
-  let app: FastifyInstance;
-
-  beforeEach(async () => {
-    app = await getApp({
-      excludeRoutes: ['/date'],
-      statusesToCache: [200, 201],
-      methodsToCache: ['GET', 'POST'],
+      expect(res1.body).not.toBe(res2.body);
+      // cache is not expected to be used
+      expect(spies.getDate).toHaveBeenCalledTimes(2);
     });
   });
 
-  afterEach(async () => {
-    await app.close();
-  });
-
-  test('Response should be cached separately for different body', async () => {
-    const spyGet = jest.spyOn(app.lcache.storage, 'get');
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const res1 = await app.inject({
-      method: 'POST',
-      path: '/post',
-      body: {
-        data: 'first-payload',
-      },
-    });
-
-    const res2 = await app.inject({
-      method: 'POST',
-      path: '/post',
-      body: {
-        data: 'second-payload',
-      },
-    });
-
-    expect(res1.body).not.toBe(res2.body);
-    expect(spyGet).not.toHaveBeenCalled();
-    expect(spySet).toHaveBeenCalledTimes(2);
-  });
-
-  test('Excluded routes should not be cached', async () => {
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const res1 = await app.inject({
-      method: 'GET',
-      path: '/date',
-    });
-
-    const res2 = await app.inject({
-      method: 'GET',
-      path: '/date',
-    });
-
-    expect(res1.body).not.toBe(res2.body);
-    expect(spySet).not.toHaveBeenCalled();
-  });
-
-  test('PUT method should not be cached when only status code is 201', async () => {
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const res1 = await app.inject({
-      method: 'PUT',
-      path: '/put',
-      payload: {
-        data: '456',
-      },
-    });
-
-    const res2 = await app.inject({
-      method: 'PUT',
-      path: '/put',
-      payload: {
-        data: '123',
-      },
-    });
-
-    expect(res1.body).not.toBe(res2.body);
-    expect(spySet).not.toHaveBeenCalled();
-  });
-
-  test('Cache reset should work', async () => {
-    const spySet = jest.spyOn(app.lcache.storage, 'set');
-    const getPing = async () =>
-      app.inject({
-        method: 'GET',
-        path: '/ping',
+  describe('Caching with custom options', () => {
+    beforeEach(async () => {
+      app = await getApp({
+        excludeRoutes: ['/date'],
+        statusesToCache: [200, 201],
+        methodsToCache: ['GET', 'POST'],
       });
+    });
 
-    const postPing = async () =>
-      app.inject({
+    test('Response should be cached separately for different body', async () => {
+      const res1 = await app.inject({
         method: 'POST',
-        path: '/ping',
+        path: '/post',
+        body: {
+          data: 'first-payload',
+        },
       });
 
-    const dataKey1 = 'someKey1';
-    const dataValue1 = 'someValue1';
-    const dataKey2 = 'someKey2';
-    const dataValue2 = [1, 2, 3, 4];
-    const dataKey3 = 'someKey3';
-    const dataValue3 = 'someValue3';
+      const res2 = await app.inject({
+        method: 'POST',
+        path: '/post',
+        body: {
+          data: 'second-payload',
+        },
+      });
 
-    // add data to the cache via request
-    await getPing();
-    await postPing();
-    // manually set some values
-    app.lcache.set(dataKey1, dataValue1);
-    app.lcache.set(dataKey2, dataValue2);
-    app.lcache.set(dataKey3, dataValue3);
-
-    expect(spySet).toBeCalledTimes(5); // 1 post + 1 get requests + 3 manual set
-    // remove specific key
-    app.lcache.reset(dataKey1);
-    app.lcache.reset([dataKey3]); // also check array
-
-    expect(app.lcache.get(dataKey1)).toBeFalsy();
-    expect(app.lcache.get(dataKey1)).toBeUndefined();
-    expect(app.lcache.get(dataKey3)).toBeUndefined();
-    // expect not specified data is still in the cache
-    expect(app.lcache.get(dataKey2)).toStrictEqual(dataValue2);
-
-    // prune all cached data
-    app.lcache.reset();
-    expect(app.lcache.has(dataKey2)).toBeFalsy();
-    expect(app.lcache.get(dataKey2)).toBeUndefined();
-
-    // check cached data via request
-    const spyGet = jest.spyOn(app.lcache.storage, 'get');
-    await getPing();
-    await postPing();
-    // lcache should place data again to the cache and not try to get it
-    expect(spyGet).not.toHaveBeenCalled();
-  });
-});
-
-describe('Disabled lcache plugin', () => {
-  let app: FastifyInstance;
-  const methodsToCache: RequestMethod[] = ['GET', 'POST', 'DELETE'];
-
-  beforeEach(async () => {
-    app = await getApp({
-      excludeRoutes: [],
-      statusesToCache: [200, 201],
-      methodsToCache,
-      disableCache: true,
+      expect(res1.body).not.toBe(res2.body);
+      // endpoint should be reached each time
+      expect(spies.postPost).toHaveBeenCalledTimes(2);
     });
-  });
 
-  afterEach(async () => {
-    await app.close();
-  });
+    test('Excluded routes should not be cached', async () => {
+      const res1 = await app.inject({
+        method: 'GET',
+        path: '/date',
+      });
 
-  test.each(methodsToCache)(
-    "Shouldn't cache %s method regardless plugin config",
-    async (httpMethod) => {
-      const spySet = jest.spyOn(app.lcache.storage, 'set');
+      const res2 = await app.inject({
+        method: 'GET',
+        path: '/date',
+      });
 
-      await app.inject({
-        method: httpMethod,
-        path: '/ping',
+      expect(res1.body).not.toBe(res2.body);
+      expect(spies.getDate).toHaveBeenCalledTimes(2);
+    });
+
+    test('PUT method should not be cached when only status code is 201', async () => {
+      const res1 = await app.inject({
+        method: 'PUT',
+        path: '/put',
         payload: {
           data: '456',
         },
       });
 
-      expect(spySet).not.toHaveBeenCalled();
-    }
-  );
-});
+      const res2 = await app.inject({
+        method: 'PUT',
+        path: '/put',
+        payload: {
+          data: '123',
+        },
+      });
 
-describe('TTL', () => {
-  const TLL_CHECK_INTERVAL_MS = 1500;
-  const msToWait = TLL_CHECK_INTERVAL_MS * 3;
-  // convert to minutes for lcache usage
-  const ttlInMinutes = TLL_CHECK_INTERVAL_MS / 60000;
-  let app: FastifyInstance;
+      expect(res1.body).not.toBe(res2.body);
+      expect(spies.putPut).toHaveBeenCalledTimes(2);
+    });
 
-  beforeEach(() => {
-    // increase timeout of the tests
-    jest.setTimeout(msToWait * 4);
+    test('Cache reset should work', async () => {
+      const getPing = async () =>
+        app.inject({
+          method: 'GET',
+          path: '/ping',
+        });
+
+      const postPing = async () =>
+        app.inject({
+          method: 'POST',
+          path: '/ping',
+        });
+
+      const dataKey1 = 'someKey1';
+      const dataValue1 = 'someValue1';
+      const dataKey2 = 'someKey2';
+      const dataValue2 = [1, 2, 3, 4];
+      const dataKey3 = 'someKey3';
+      const dataValue3 = 'someValue3';
+
+      // add data to the cache via request
+      await postPing();
+      await getPing();
+      // manually set some values
+      app.lcache.set(dataKey1, dataValue1);
+      app.lcache.set(dataKey2, dataValue2);
+      app.lcache.set(dataKey3, dataValue3);
+
+      // 1 post + 1 get + 3 manual set
+      // remove specific key
+      app.lcache.reset(dataKey1);
+      app.lcache.reset([dataKey3]); // also test array
+
+      expect(app.lcache.has(dataKey1)).toBeFalsy();
+      expect(app.lcache.get(dataKey1)).toBeUndefined();
+      expect(app.lcache.get(dataKey3)).toBeUndefined();
+      // expect not removed data is still in the cache
+      expect(app.lcache.get(dataKey2)).toStrictEqual(dataValue2);
+
+      // prune all cached data
+      app.lcache.reset();
+      expect(app.lcache.has(dataKey2)).toBeFalsy();
+      expect(app.lcache.get(dataKey2)).toBeUndefined();
+
+      // check cached data via request
+      await getPing();
+      await postPing();
+      // the endpoints should be reached again
+      expect(spies.getPing).toHaveBeenCalledTimes(2);
+      expect(spies.postPing).toHaveBeenCalledTimes(2);
+    });
   });
 
-  afterEach(async () => {
-    await app.close();
+  describe('Disabled lcache plugin', () => {
+    const methodsToCache: RequestMethod[] = ['get', 'post', 'delete'];
+
+    beforeEach(async () => {
+      app = await getApp({
+        excludeRoutes: [],
+        statusesToCache: [200, 201],
+        methodsToCache,
+        // disable cache programmatically
+        disableCache: true,
+      });
+    });
+
+    test.each(methodsToCache)(
+      "Shouldn't reach %s /ping avoiding cache",
+      async (httpMethod) => {
+        await app.inject({
+          method: httpMethod,
+          path: '/ping',
+          payload: {
+            data: '456',
+          },
+        });
+
+        await app.inject({
+          method: httpMethod,
+          path: '/ping',
+          payload: {
+            data: '456',
+          },
+        });
+
+        const method = `${httpMethod}Ping` as keyof typeof spies;
+        // each time reach endpoint
+        expect(spies[method]).toHaveBeenCalledTimes(2);
+      }
+    );
   });
 
-  test('Cached data should be removed after ttl - timeout', async () => {
-    app = await getApp({
-      ttlInMinutes,
+  describe('TTL', () => {
+    const msToWait = 3_000;
+    // convert to minutes for lcache usage
+    const ttlInMinutes = msToWait / 60_000;
+
+    beforeEach(() => {
+      // increase timeout of the tests
+      jest.setTimeout(msToWait * 3);
     });
 
-    const key = 'someKey';
-    const value = 'someValue';
+    test('Cached data should be removed after ttl - timeout', async () => {
+      app = await getApp({
+        ttlInMinutes,
+      });
 
-    app.lcache.set(key, value);
-    // wait increased ttl time
-    await new Promise((resolve) => {
-      setTimeout(resolve, msToWait);
+      const key = 'someKey';
+      const value = 'someValue';
+
+      app.lcache.set(key, value);
+      // wait increased ttl time
+      await new Promise((resolve) => {
+        setTimeout(resolve, msToWait);
+      });
+
+      expect(app.lcache.has(key)).toBeFalsy();
+      expect(app.lcache.get(key)).toBeUndefined();
     });
-
-    expect(app.lcache.get(key)).toBeUndefined();
-    expect(app.lcache.has(key)).toBeFalsy();
-  });
-
-  test('Cached data should be removed after ttl - interval', async () => {
-    app = await getApp({
-      ttlInMinutes,
-    });
-
-    const key = 'someKey';
-    const value = 'someValue';
-
-    app.lcache.set(key, value);
-    // wait increased ttl time
-    await new Promise((resolve) => {
-      setTimeout(resolve, msToWait);
-    });
-
-    expect(app.lcache.get(key)).toBeUndefined();
-    expect(app.lcache.has(key)).toBeFalsy();
   });
 });
