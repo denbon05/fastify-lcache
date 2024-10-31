@@ -1,11 +1,10 @@
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
 import * as constants from './constants';
-import { formatOptions, shouldDataBeCached } from './helpers';
+import { LightCache } from './models/LightCache';
 import MapStorage from './models/MapStorage';
 import type { ICacheOptions } from './types/lcache';
-import { buildCacheKey } from './utils';
-import { LightCache } from './models/LightCache';
+import * as utils from './utils';
 
 // all default options goes here
 const defaultOpts: Required<ICacheOptions> = {
@@ -14,6 +13,7 @@ const defaultOpts: Required<ICacheOptions> = {
   methodsToCache: constants.METHODS_TO_CACHE,
   excludeRoutes: [],
   disableCache: false,
+  includeRoutes: '*',
 };
 
 const cache: FastifyPluginCallback<ICacheOptions> = (
@@ -22,18 +22,25 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   opts: ICacheOptions = {},
   next
 ) => {
-  const pluginOpts = formatOptions({ ...defaultOpts, ...opts });
+  const pluginOpts = utils.formatOptions({ ...defaultOpts, ...opts });
 
   const storage = new MapStorage({
     ttlInMs: pluginOpts.ttlInMs,
   });
 
   instance.addHook('onSend', async (request, reply, payload) => {
-    const cacheKey = buildCacheKey(request);
+    if (opts.disableCache) {
+      // no need to proceed
+      return;
+    }
+
+    const cacheKey = utils.buildCacheKey(request);
     const shouldValueBeCached =
       !storage.has(cacheKey) &&
-      shouldDataBeCached(pluginOpts, request, reply.statusCode) &&
-      !opts.disableCache;
+      utils.shouldDataBeCached(
+        { ...pluginOpts, statusCode: reply.statusCode },
+        request
+      );
 
     if (shouldValueBeCached) {
       storage.set(cacheKey, {
@@ -45,7 +52,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
   });
 
   instance.addHook('onRequest', async (request, reply) => {
-    const cacheKey = buildCacheKey(request);
+    const cacheKey = utils.buildCacheKey(request);
 
     if (storage.has(cacheKey)) {
       const { headers, payload, statusCode } = storage.get(cacheKey);

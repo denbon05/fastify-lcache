@@ -6,8 +6,24 @@ export type RequestMethod = InjectOptions['method'];
 export interface ICachePluginOptions extends IStorageOptions {
   methodsToCache: Set<RequestMethod>;
   statusesToCache: Set<number>;
-  excludeRoutes: Set<string>;
+  excludeRoutes: string[];
+  includeRoutes: '*' | string[];
+  statusCode: number;
 }
+
+export type CompileRoutePatternsParam = Pick<
+  Required<ICachePluginOptions>,
+  'includeRoutes' | 'excludeRoutes'
+>;
+
+export type ShouldCacheRouteParam = {
+  route: string;
+} & {
+  includePatterns: RegExp[];
+  excludePatterns: RegExp[];
+};
+
+export type FormattedOps = Omit<ICachePluginOptions, 'statusCode'>;
 
 export interface ICacheOptions {
   /** Specify is plugin should be disabled
@@ -30,10 +46,18 @@ export interface ICacheOptions {
    */
   statusesToCache?: number[];
 
-  /** Routes which should be ignored by lcache plugin
+  /** Caching will not be applied to these routes
+   * @priority over `includeRoutes` option
    * @default []
    */
   excludeRoutes?: string[];
+
+  /** Routes that should be included for caching by the lcache plugin.
+   * Match all routes if set to '*'
+   * @note `excludeRoutes` has a priority over this option
+   * @default '*'
+   */
+  includeRoutes?: '*' | string[];
 }
 
 export interface ILightCache {

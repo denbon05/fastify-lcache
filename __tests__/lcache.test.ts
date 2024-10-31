@@ -1,7 +1,7 @@
 import '@/types/fastify';
 import type { RequestMethod } from '@/types/lcache';
 import type { FastifyInstance } from 'fastify';
-import { getApp, spies } from './helpers';
+import { getApp, spies } from './helpers/lcache';
 
 describe('Light Cache Fastify plugin', () => {
   let app: FastifyInstance;
