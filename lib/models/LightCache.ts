@@ -3,7 +3,7 @@ import type { IStorage } from '@/types/storage';
 
 // facade for storage instance
 export class LightCache implements ILightCache {
-  readonly storage: IStorage;
+  private readonly storage: IStorage;
 
   constructor(storage: IStorage) {
     this.storage = storage;

@@ -1,6 +1,7 @@
-import type { IStorage, IStorageOptions } from './storage';
+import type { InjectOptions } from 'fastify';
+import type { IStorageOptions } from './storage';
 
-export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type RequestMethod = InjectOptions['method'];
 
 export interface ICachePluginOptions extends IStorageOptions {
   methodsToCache: Set<RequestMethod>;
@@ -36,11 +37,6 @@ export interface ICacheOptions {
 }
 
 export interface ILightCache {
-  /**
-   * Internal storage instance
-   */
-  storage: IStorage;
-
   /**
    * Get cached data
    */
