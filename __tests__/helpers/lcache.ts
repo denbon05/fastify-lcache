@@ -11,6 +11,7 @@ export const spies = {
   postPost: jest.fn(),
   getDate: jest.fn(),
   putPut: jest.fn(),
+  postApiAdmin: jest.fn(),
 };
 
 export const getApp = (options: Partial<ICacheOptions> = {}) => {
@@ -56,6 +57,11 @@ export const getApp = (options: Partial<ICacheOptions> = {}) => {
     app.put("/put", async (req: any, reply) => {
       spies.putPut();
       reply.status(201).send(req.body.data);
+    });
+
+    app.post("/api/admin", async (req, reply) => {
+      spies.postApiAdmin();
+      reply.send("secret");
     });
   });
 

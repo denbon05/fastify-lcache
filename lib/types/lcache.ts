@@ -71,6 +71,7 @@ export interface ICacheOptions {
    * By default all routes included for caching.
    * When specified particular routes, only those are
    * cached, while all other routes are ignored by the cache.
+   * @since v2.2.0
    * @note `excludeRoutes` has a priority over this option
    * @default '*'
    *

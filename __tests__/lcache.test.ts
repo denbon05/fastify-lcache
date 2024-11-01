@@ -223,6 +223,78 @@ describe("Light Cache Fastify plugin", () => {
     });
   });
 
+  describe("Route caching", () => {
+    beforeEach(async () => {
+      app = await getApp({
+        excludeRoutes: ["/ping", "/api/adm*"],
+        includeRoutes: ["/ping", "/js*n", "/api/admin*", "/date/*"],
+        statusesToCache: [200, 201],
+        methodsToCache: ["GET", "POST", "PUT"],
+      });
+    });
+
+    it("should cache included route pattern", async () => {
+      await app.inject({
+        path: "/json",
+      });
+      await app.inject({
+        path: "/json",
+      });
+
+      expect(spies.getJSON).toHaveBeenCalledTimes(1);
+    });
+
+    it("shouldn't cache unspecified route in 'includeRoutes'", async () => {
+      await app.inject({
+        method: "put",
+        path: "/put",
+      });
+      await app.inject({
+        method: "put",
+        path: "/put",
+      });
+
+      expect(spies.putPut).toHaveBeenCalledTimes(2);
+    });
+
+    it("shouldn't cache included routes if excluded routes match", async () => {
+      await app.inject({
+        method: "POST",
+        path: "/ping",
+      });
+      await app.inject({
+        method: "POST",
+        path: "/ping",
+      });
+
+      expect(spies.postPing).toHaveBeenCalledTimes(2);
+    });
+
+    it("shouldn't cache excluded pattern", async () => {
+      await app.inject({
+        method: "POST",
+        path: "/api/admin",
+      });
+      await app.inject({
+        method: "POST",
+        path: "/api/admin",
+      });
+
+      expect(spies.postApiAdmin).toHaveBeenCalledTimes(2);
+    });
+
+    it("shouldn't cache route pattern with trailing slash", async () => {
+      await app.inject({
+        path: "/date",
+      });
+      await app.inject({
+        path: "/date",
+      });
+
+      expect(spies.getDate).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe("Disabled lcache plugin", () => {
     const methodsToCache: RequestMethod[] = ["get", "post", "delete"];
 
