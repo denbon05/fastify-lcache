@@ -10,6 +10,12 @@ data on first request and use it next time until <a href="https://en.wikipedia.o
 npm i fastify-lcache
 ```
 
+<h2>Table of Contents</h2>
+
+- [Example](#example)
+- [Plugin API](#api)
+- [Route caching](#route-caching)
+
 ## Example
 
 ```ts
@@ -62,6 +68,7 @@ axios.get(url);
   statusesToCache?: [200],
   methodsToCache?: ['GET'],
   excludeRoutes?: [],
+  includeRoutes?: '*'
 }
 ```
 
@@ -85,6 +92,31 @@ interface ILightCache {
 
   // Clear Interval which check data lifetime
   destroy(): void;
+}
+```
+
+### Route caching
+
+If a route matches any pattern in `excludeRoutes`, it will **never be cached**.
+
+**Unspecified Routes**<br />
+If a route is neither in `includeRoutes` nor `excludeRoutes`:<br />
+When `includeRoutes` specifies particular routes, only those specified are cached, 
+while all other routes are ignored by the cache.
+
+```js
+// Scenario 1: includeRoutes: '*' with specific excludeRoutes
+// Behavior: All routes are cached except '/auth/*' and '/admin/*'
+{
+  includeRoutes: '*',
+  excludeRoutes: ['/auth*', '/admin*']
+}
+*
+// Scenario 2: Specific Routes for includeRoutes and excludeRoutes
+// Behavior: Only '/api/users' and '/api/orders' are cached, and the rest is ignored
+{
+  includeRoutes: ['/api/users', '/api/orders']
+  excludeRoutes: ['/api/secret'],
 }
 ```
 
