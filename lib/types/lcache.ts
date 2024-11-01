@@ -77,7 +77,7 @@ export interface ICacheOptions {
    *
    * @example
    * // Scenario 1: includeRoutes: '*' with specific excludeRoutes
-   * // Behavior: All routes are cached except '/auth/*' and '/admin/*'
+   * // Behavior: All routes are cached except '/auth*' and '/admin*'
    * {
    *   includeRoutes: '*',
    *   excludeRoutes: ['/auth/*', '/admin/*']
