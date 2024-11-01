@@ -1,11 +1,12 @@
 {
-  "extends": [
-    "./tsconfig.json"
-  ],
-  "include": [
-    "lib/**/*.ts"
-  ],
-  "exclude": [
-    "__tests__/**/*.ts"
-  ]
+  "extends": ["./tsconfig.json"],
+  "compilerOptions": {
+    "declaration": true,
+    "target": "esnext",
+    "module": "CommonJS",
+    "baseUrl": ".",
+    "outDir": "dist"
+  },
+  "include": ["lib/**/*.ts"],
+  "exclude": ["__tests__/**/*.ts", "jest.config.ts"]
 }

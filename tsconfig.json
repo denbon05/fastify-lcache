@@ -1,27 +1,16 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "baseUrl": ".",
-    "outDir": "dist",
     "resolveJsonModule": true,
-    "declaration": true,
-    "types": [
-      "node",
-      "jest"
-    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"],
     "paths": {
-      "@/*": [
-        "./lib/*"
-      ]
-    },
+      "@/*": ["./lib/*"]
+    }
   },
-  "include": [
-    "lib/**/*.ts",
-    "__tests__/**/*.ts"
-  ],
+  "include": ["lib/**/*.ts", "__tests__/**/*.ts", "jest.config.ts"],
   "ts-node": {
     "moduleTypes": {
       "jest.config.ts": "cjs"
