@@ -1,10 +1,10 @@
-import * as utils from '@/utils';
+import * as utils from "@/utils";
 
-describe('Plugin utils', () => {
-  describe('Routes', () => {
-    test('Should convert routes to RegExp', () => {
-      const includeRoute1 = '/foo/bar';
-      const excludeRoute1 = '/hi';
+describe("Plugin utils", () => {
+  describe("Routes", () => {
+    it("Should convert routes to RegExp", () => {
+      const includeRoute1 = "/foo/bar";
+      const excludeRoute1 = "/hi";
 
       const expectedPatterns = {
         includePatterns: [new RegExp(includeRoute1)],
@@ -12,17 +12,17 @@ describe('Plugin utils', () => {
       };
 
       const actualPatterns = utils.compileRoutePatterns({
-        includeRoutes: ['/foo/bar'],
-        excludeRoutes: ['/hi'],
+        includeRoutes: ["/foo/bar"],
+        excludeRoutes: ["/hi"],
       });
       expect(actualPatterns).toMatchObject(expectedPatterns);
     });
 
-    test("'excludeRoutes' should take priority over 'includeRoutes'", () => {
-      const currentRoute = '/hi';
+    it("'excludeRoutes' should take priority over 'includeRoutes'", () => {
+      const currentRoute = "/hi";
       const routePatterns = utils.compileRoutePatterns({
-        includeRoutes: '*',
-        excludeRoutes: [currentRoute, '/foo/bar'],
+        includeRoutes: "*",
+        excludeRoutes: [currentRoute, "/foo/bar"],
       });
 
       const shouldRouteBeCached = utils.shouldCacheRoute({

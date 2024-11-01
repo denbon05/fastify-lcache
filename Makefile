@@ -1,3 +1,6 @@
+# run all CI checks
+all: build lint test
+
 ci:
 	npm ci
 
@@ -6,6 +9,9 @@ test:
 
 cover:
 	npm test -- --coverage --coverageProvider=v8
+
+lint:
+	npx eslint .
 
 format:
 	npx prettier --write .

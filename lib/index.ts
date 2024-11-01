@@ -1,10 +1,10 @@
-import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
-import fp from 'fastify-plugin';
-import * as constants from './constants';
-import { LightCache } from './models/LightCache';
-import MapStorage from './models/MapStorage';
-import type { ICacheOptions } from './types/lcache';
-import * as utils from './utils';
+import type { FastifyInstance, FastifyPluginCallback } from "fastify";
+import fp from "fastify-plugin";
+import * as constants from "./constants";
+import { LightCache } from "./models/LightCache";
+import MapStorage from "./models/MapStorage";
+import type { ICacheOptions } from "./types/lcache";
+import * as utils from "./utils";
 
 // all default options goes here
 const defaultOpts: Required<ICacheOptions> = {
@@ -13,7 +13,7 @@ const defaultOpts: Required<ICacheOptions> = {
   methodsToCache: constants.METHODS_TO_CACHE,
   excludeRoutes: [],
   disableCache: false,
-  includeRoutes: '*',
+  includeRoutes: "*",
 };
 
 const cache: FastifyPluginCallback<ICacheOptions> = (
@@ -28,7 +28,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     ttlInMs: pluginOpts.ttlInMs,
   });
 
-  instance.addHook('onSend', async (request, reply, payload) => {
+  instance.addHook("onSend", async (request, reply, payload) => {
     if (opts.disableCache) {
       // no need to proceed
       return;
@@ -51,7 +51,7 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     }
   });
 
-  instance.addHook('onRequest', async (request, reply) => {
+  instance.addHook("onRequest", async (request, reply) => {
     const cacheKey = utils.buildCacheKey(request);
 
     if (storage.has(cacheKey)) {
@@ -67,20 +67,20 @@ const cache: FastifyPluginCallback<ICacheOptions> = (
     }
   });
 
-  instance.addHook('onClose', (_instance, done) => {
+  instance.addHook("onClose", (_instance, done) => {
     storage.destroy();
     done();
   });
 
   const lcacheInstance = new LightCache(storage);
-  instance.decorate('lcache', lcacheInstance);
+  instance.decorate("lcache", lcacheInstance);
 
   next();
 };
 
 const lcache = fp(cache, {
-  name: '@fastify/lcache',
-  fastify: '>=4.10',
+  name: "@fastify/lcache",
+  fastify: ">=4.10",
 });
 
 /**

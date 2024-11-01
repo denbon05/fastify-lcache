@@ -1,4 +1,4 @@
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply } from "fastify";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IStorageOptions {
@@ -11,7 +11,7 @@ export type SrcMeta = Map<string, { updatedAt: number }>;
 export type StoredData<T> = {
   payload: T;
   statusCode?: number;
-  headers?: ReturnType<FastifyReply['getHeaders']>;
+  headers?: ReturnType<FastifyReply["getHeaders"]>;
 };
 
 export interface IStorage {

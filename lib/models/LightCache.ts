@@ -1,5 +1,5 @@
-import type { ILightCache } from '@/types/lcache';
-import type { IStorage } from '@/types/storage';
+import type { ILightCache } from "@/types/lcache";
+import type { IStorage } from "@/types/storage";
 
 // facade for storage instance
 export class LightCache implements ILightCache {

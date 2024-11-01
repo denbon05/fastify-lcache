@@ -3,9 +3,9 @@ import type {
   ICachePluginOptions,
   RequestMethod,
   ShouldCacheRouteParam,
-} from '@/types/lcache';
-import type { FastifyRequest } from 'fastify';
-import { wildcardToRegExp } from './helpers';
+} from "@/types/lcache";
+import type { FastifyRequest } from "fastify";
+import { wildcardToRegExp } from "./helpers";
 
 export const shouldCacheRoute = ({
   includePatterns,
@@ -25,7 +25,7 @@ export const compileRoutePatterns = ({
   excludeRoutes,
 }: CompileRoutePatternsParam) => {
   const includePatterns =
-    includeRoutes === '*'
+    includeRoutes === "*"
       ? [/.*/] // Match all routes if includeRoutes is '*'
       : includeRoutes.map(wildcardToRegExp);
 

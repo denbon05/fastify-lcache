@@ -14,11 +14,11 @@ npm i fastify-lcache
 
 ```ts
 // your app
-import fastify from 'fastify';
-import lcache from 'fastify-lcache';
+import fastify from "fastify";
+import lcache from "fastify-lcache";
 
 const app = fastify();
-const address = '0.0.0.0';
+const address = "0.0.0.0";
 const port = 4000;
 
 app.register(lcache, {
@@ -27,8 +27,8 @@ app.register(lcache, {
 
 app.after(() => {
   // add your routes
-  app.get('/ping', async (req, reply) => {
-    reply.send('pong');
+  app.get("/ping", async (req, reply) => {
+    reply.send("pong");
   });
 });
 
@@ -37,7 +37,7 @@ app.listen(port, address);
 
 ```ts
 // client wants data from your app
-const url = 'http://0.0.0.0:4000/ping';
+const url = "http://0.0.0.0:4000/ping";
 // first request will return origin data from route '/ping'
 // and put result to the cache
 axios.get(url);

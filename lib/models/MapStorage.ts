@@ -4,7 +4,7 @@ import type {
   Src,
   SrcMeta,
   StoredData,
-} from '../types/storage';
+} from "../types/storage";
 
 export default class Storage implements IStorage {
   private src: Src = new Map();
@@ -67,7 +67,7 @@ export default class Storage implements IStorage {
   /** Remove value by specified key or keys.
    * @note Remove all cached values if argument not specified. */
   public reset = (key?: string | string[]): void => {
-    if (typeof key === 'string') {
+    if (typeof key === "string") {
       this.src.delete(key);
       this.srcMeta.delete(key);
     } else if (Array.isArray(key)) {

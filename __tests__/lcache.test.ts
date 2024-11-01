@@ -1,9 +1,9 @@
-import '@/types/fastify';
-import type { RequestMethod } from '@/types/lcache';
-import type { FastifyInstance } from 'fastify';
-import { getApp, spies } from './helpers/lcache';
+import "@/types/fastify";
+import type { RequestMethod } from "@/types/lcache";
+import type { FastifyInstance } from "fastify";
+import { getApp, spies } from "./helpers/lcache";
 
-describe('Light Cache Fastify plugin', () => {
+describe("Light Cache Fastify plugin", () => {
   let app: FastifyInstance;
 
   afterEach(async () => {
@@ -11,21 +11,21 @@ describe('Light Cache Fastify plugin', () => {
     await app.close();
   });
 
-  describe('Caching with default options', () => {
+  describe("Caching with default options", () => {
     beforeEach(async () => {
       app = await getApp();
     });
 
-    test('Plugin should exist on app instance', () => {
-      expect(app.hasDecorator('lcache')).toBeTruthy();
+    it("Plugin should exist on app instance", () => {
+      expect(app.hasDecorator("lcache")).toBeTruthy();
     });
 
-    test('Should be possible to put/retrieve values from app instance', () => {
-      const strKey = 'str';
-      const expectedStrValue = 'data1';
-      const objKey = 'obj';
+    it("should be possible to put/retrieve values from app instance", () => {
+      const strKey = "str";
+      const expectedStrValue = "data1";
+      const objKey = "obj";
       const expectedObjValue = {
-        name: 'Bob',
+        name: "Bob",
         age: 23,
       };
       app.lcache.set(strKey, expectedStrValue);
@@ -38,9 +38,9 @@ describe('Light Cache Fastify plugin', () => {
       expect(actualObjValue).toEqual(actualObjValue);
     });
 
-    test('Should be possible to overwrite data by key', () => {
-      const key = 'str';
-      const value1 = 'data1';
+    it("should be possible to overwrite data by key", () => {
+      const key = "str";
+      const value1 = "data1";
       const value2 = NaN;
 
       app.lcache.set(key, value1);
@@ -49,12 +49,12 @@ describe('Light Cache Fastify plugin', () => {
       expect(app.lcache.get(key)).toStrictEqual(value2);
     });
 
-    test('Cache should work', async () => {
-      const expectedValue = 'pong';
+    it("cache should work", async () => {
+      const expectedValue = "pong";
       const getPing = async () =>
         app.inject({
-          method: 'GET',
-          path: '/ping',
+          method: "GET",
+          path: "/ping",
         });
 
       const res1 = await getPing();
@@ -69,32 +69,32 @@ describe('Light Cache Fastify plugin', () => {
       expect(res2.body).toBe(expectedValue);
     });
 
-    test('Cache should return same headers as the original request', async () => {
+    it("cache should return same headers as the original request", async () => {
       const getJson = async () =>
         app.inject({
-          method: 'GET',
-          path: '/json',
+          method: "GET",
+          path: "/json",
         });
 
       const res1 = await getJson();
       const res2 = await getJson();
 
-      expect(res2.headers['content-type']).toBe(res1.headers['content-type']);
+      expect(res2.headers["content-type"]).toBe(res1.headers["content-type"]);
       // endpoint reached only once
       expect(spies.getJSON).toHaveBeenCalledTimes(1);
     });
 
-    test('Response should be cached separately for different query', async () => {
+    it("response should be cached separately for different query", async () => {
       const res1 = await app.inject({
-        method: 'GET',
-        path: '/date',
-        query: 'asd',
+        method: "GET",
+        path: "/date",
+        query: "asd",
       });
 
       const res2 = await app.inject({
-        method: 'GET',
-        path: '/date',
-        query: 'sdf',
+        method: "GET",
+        path: "/date",
+        query: "sdf",
       });
 
       expect(res1.body).not.toBe(res2.body);
@@ -103,29 +103,29 @@ describe('Light Cache Fastify plugin', () => {
     });
   });
 
-  describe('Caching with custom options', () => {
+  describe("caching with custom options", () => {
     beforeEach(async () => {
       app = await getApp({
-        excludeRoutes: ['/date'],
+        excludeRoutes: ["/date"],
         statusesToCache: [200, 201],
-        methodsToCache: ['GET', 'POST'],
+        methodsToCache: ["GET", "POST"],
       });
     });
 
-    test('Response should be cached separately for different body', async () => {
+    it("response should be cached separately for different body", async () => {
       const res1 = await app.inject({
-        method: 'POST',
-        path: '/post',
+        method: "POST",
+        path: "/post",
         body: {
-          data: 'first-payload',
+          data: "first-payload",
         },
       });
 
       const res2 = await app.inject({
-        method: 'POST',
-        path: '/post',
+        method: "POST",
+        path: "/post",
         body: {
-          data: 'second-payload',
+          data: "second-payload",
         },
       });
 
@@ -134,35 +134,35 @@ describe('Light Cache Fastify plugin', () => {
       expect(spies.postPost).toHaveBeenCalledTimes(2);
     });
 
-    test('Excluded routes should not be cached', async () => {
+    it("excluded routes should not be cached", async () => {
       const res1 = await app.inject({
-        method: 'GET',
-        path: '/date',
+        method: "GET",
+        path: "/date",
       });
 
       const res2 = await app.inject({
-        method: 'GET',
-        path: '/date',
+        method: "GET",
+        path: "/date",
       });
 
       expect(res1.body).not.toBe(res2.body);
       expect(spies.getDate).toHaveBeenCalledTimes(2);
     });
 
-    test('PUT method should not be cached when only status code is 201', async () => {
+    it("PUT method should not be cached when only status code is 201", async () => {
       const res1 = await app.inject({
-        method: 'PUT',
-        path: '/put',
+        method: "PUT",
+        path: "/put",
         payload: {
-          data: '456',
+          data: "456",
         },
       });
 
       const res2 = await app.inject({
-        method: 'PUT',
-        path: '/put',
+        method: "PUT",
+        path: "/put",
         payload: {
-          data: '123',
+          data: "123",
         },
       });
 
@@ -170,25 +170,25 @@ describe('Light Cache Fastify plugin', () => {
       expect(spies.putPut).toHaveBeenCalledTimes(2);
     });
 
-    test('Cache reset should work', async () => {
+    it("cache reset should work", async () => {
       const getPing = async () =>
         app.inject({
-          method: 'GET',
-          path: '/ping',
+          method: "GET",
+          path: "/ping",
         });
 
       const postPing = async () =>
         app.inject({
-          method: 'POST',
-          path: '/ping',
+          method: "POST",
+          path: "/ping",
         });
 
-      const dataKey1 = 'someKey1';
-      const dataValue1 = 'someValue1';
-      const dataKey2 = 'someKey2';
+      const dataKey1 = "someKey1";
+      const dataValue1 = "someValue1";
+      const dataKey2 = "someKey2";
       const dataValue2 = [1, 2, 3, 4];
-      const dataKey3 = 'someKey3';
-      const dataValue3 = 'someValue3';
+      const dataKey3 = "someKey3";
+      const dataValue3 = "someValue3";
 
       // add data to the cache via request
       await postPing();
@@ -223,8 +223,8 @@ describe('Light Cache Fastify plugin', () => {
     });
   });
 
-  describe('Disabled lcache plugin', () => {
-    const methodsToCache: RequestMethod[] = ['get', 'post', 'delete'];
+  describe("Disabled lcache plugin", () => {
+    const methodsToCache: RequestMethod[] = ["get", "post", "delete"];
 
     beforeEach(async () => {
       app = await getApp({
@@ -236,22 +236,22 @@ describe('Light Cache Fastify plugin', () => {
       });
     });
 
-    test.each(methodsToCache)(
-      "Shouldn't reach %s /ping avoiding cache",
+    it.each(methodsToCache)(
+      "shouldn't reach %s /ping avoiding cache",
       async (httpMethod) => {
         await app.inject({
           method: httpMethod,
-          path: '/ping',
+          path: "/ping",
           payload: {
-            data: '456',
+            data: "456",
           },
         });
 
         await app.inject({
           method: httpMethod,
-          path: '/ping',
+          path: "/ping",
           payload: {
-            data: '456',
+            data: "456",
           },
         });
 
@@ -262,7 +262,7 @@ describe('Light Cache Fastify plugin', () => {
     );
   });
 
-  describe('TTL', () => {
+  describe("TTL", () => {
     const msToWait = 3_000;
     // convert to minutes for lcache usage
     const ttlInMinutes = msToWait / 60_000;
@@ -272,13 +272,13 @@ describe('Light Cache Fastify plugin', () => {
       jest.setTimeout(msToWait * 3);
     });
 
-    test('Cached data should be removed after ttl - timeout', async () => {
+    it("cached data should be removed after ttl - timeout", async () => {
       app = await getApp({
         ttlInMinutes,
       });
 
-      const key = 'someKey';
-      const value = 'someValue';
+      const key = "someKey";
+      const value = "someValue";
 
       app.lcache.set(key, value);
       // wait increased ttl time
