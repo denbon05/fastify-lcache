@@ -14,7 +14,10 @@ npm i fastify-lcache
 
 - [Example](#example)
 - [Plugin API](#api)
-- [Route caching](#route-caching)
+  - [Options](#options-default)
+  - [On fastify instance](#on-fastify-instance)
+  - [Route caching](#route-caching)
+- [Fastify compatibility](#fastify-version-compatibility)
 
 ## Example
 
@@ -111,7 +114,7 @@ while all other routes are ignored by the cache.
   includeRoutes: '*',
   excludeRoutes: ['/auth*', '/admin*']
 }
-*
+
 // Scenario 2: Specific Routes for includeRoutes and excludeRoutes
 // Behavior: Only '/api/users' and '/api/orders' are cached, and the rest is ignored
 {
