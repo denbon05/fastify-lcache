@@ -19,7 +19,6 @@ export class LightCache implements ILightCache {
     this.storage.set(key, { payload });
   };
 
-  // ? what about built key on hooks
   has = (key: string): boolean => this.storage.has(key);
 
   reset = (key?: string | string[]): void => {
