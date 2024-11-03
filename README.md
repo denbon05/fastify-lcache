@@ -127,5 +127,5 @@ while all other routes are ignored by the cache.
 
 | Fastify | lcache |
 | :-----: | :----: |
-|  3-4.9  | 1-1.2  |
 |  ^4.10  |  2.x   |
+|  3-4.9  | 1-1.2  |
