@@ -34,6 +34,11 @@ jobs:
       #     npm run build
       #     npm test
 
+      - uses: qltysh/qlty-action/coverage@v2
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage/lcov.info
+
       - name: Test & publish code coverage
         if: ${{ github.ref == 'refs/heads/main' || github.actor == 'dependabot[bot]' }}
         uses: paambaati/codeclimate-action@v3.0.0
