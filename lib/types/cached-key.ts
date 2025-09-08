@@ -1,6 +1,5 @@
 import type { FastifyRequest } from "fastify";
 
-export type BuildCacheKeyParam = Pick<
-  FastifyRequest,
-  "url" | "query" | "method" | "body"
->;
+// Allow omitting body/query in tests and callers where one of them is unused
+export type BuildCacheKeyParam = Pick<FastifyRequest, "url" | "method"> &
+  Partial<Pick<FastifyRequest, "query" | "body">>;

@@ -2,9 +2,18 @@ import { LightCache } from "@/models/LightCache";
 import MapStorage from "@/models/MapStorage";
 
 describe("LightCache facade", () => {
+  let cache: LightCache | undefined;
+
+  afterEach(() => {
+    if (cache) {
+      cache.destroy();
+      cache = undefined;
+    }
+  });
+
   it("destroy should prune all data immediately", () => {
     const storage = new MapStorage({ ttlInMs: 60_000 });
-    const cache = new LightCache(storage);
+    cache = new LightCache(storage);
 
     const key = "key-to-destroy";
     const value = { foo: "bar" };
@@ -22,11 +31,8 @@ describe("LightCache facade", () => {
 
   it("get should return undefined for missing keys", () => {
     const storage = new MapStorage({ ttlInMs: 60_000 });
-    const cache = new LightCache(storage);
+    cache = new LightCache(storage);
 
     expect(cache.get("missing-key")).toBeUndefined();
-
-    cache.destroy();
   });
 });
-
