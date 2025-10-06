@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         # only LTS versions
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [16.x, 18.x, 20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,24 +27,3 @@ jobs:
       - run: npm run build
       - run: npm run lint
       - run: npm test
-      # TODO uncomment with Fastify v5 dependency
-      # - name: Check fastify v4 compatibility
-      #   run: |
-      #     npm i -D fastify@4
-      #     npm run build
-      #     npm test
-
-      - uses: qltysh/qlty-action/coverage@v2
-        with:
-          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
-          files: coverage/lcov.info
-
-      - name: Test & publish code coverage
-        if: ${{ github.ref == 'refs/heads/main' || github.actor == 'dependabot[bot]' }}
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          SESSION_KEY: ${{ secrets.SESSION_KEY }}
-        with:
-          coverageCommand: make cover
-          debug: true
