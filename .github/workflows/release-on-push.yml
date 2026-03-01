@@ -1,9 +1,15 @@
-name: Release on Dependabot merge
+name: Release on push to main
 
 on:
   push:
     branches:
       - main
+
+# Prevents two pushes from bumping at the same time; the second run waits for the first
+concurrency:
+  group: release-main
+  # Queues runs instead of cancelling them
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -11,28 +17,40 @@ permissions:
 jobs:
   bump-and-release:
     runs-on: ubuntu-latest
-    # Only run when the push is a merge from a Dependabot PR; skip our own version-bump commit
-    if: |
-      contains(github.event.head_commit.message, 'Merge pull request') &&
-      contains(github.event.head_commit.message, 'from dependabot/') &&
-      !contains(github.event.head_commit.message, 'chore(release)')
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
 
+      - name: Check if package version changed
+        id: check
+        run: |
+          # Get version before and after this push; skip bump if we can't read before (e.g. first push)
+          V_BEFORE=$(git show "${{ github.event.before }}:package.json" 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version") || echo ""
+          V_AFTER=$(node -p "require('./package.json').version")
+          echo "before=$V_BEFORE" >> $GITHUB_OUTPUT
+          echo "after=$V_AFTER" >> $GITHUB_OUTPUT
+          if [ -n "$V_BEFORE" ] && [ "$V_BEFORE" = "$V_AFTER" ]; then
+            echo "should_bump=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_bump=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Bump patch version
         run: npm version patch --no-git-tag-version
         env:
           npm_config_yes: "true"
+        if: steps.check.outputs.should_bump == 'true'
 
       - name: Get new version
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        if: steps.check.outputs.should_bump == 'true'
 
       - name: Commit and push version bump
         run: |
@@ -41,6 +59,7 @@ jobs:
           git add package.json package-lock.json
           git diff --staged --quiet || git commit -m "chore(release): v${{ steps.version.outputs.version }}"
           git push
+        if: steps.check.outputs.should_bump == 'true'
 
       - name: Create tag and release
         run: |
@@ -49,3 +68,4 @@ jobs:
           gh release create "v${{ steps.version.outputs.version }}" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.check.outputs.should_bump == 'true'
