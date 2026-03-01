@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types:
-      - closed
-    branches:
-      - main
 
 # Prevents two pushes from bumping at the same time; the second run waits for the first
 concurrency:
@@ -20,9 +15,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Runs on push to main: create release branch, PR, enable auto-merge (no wait)
-  create-release-pr:
-    if: github.event_name == 'push'
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,43 +27,53 @@ jobs:
         with:
           node-version: "20.x"
 
-      - name: Check if package version changed
-        id: check
+      - name: Check if version changed and bump if needed
+        id: version
         run: |
           V_BEFORE=$(git show "${{ github.event.before }}:package.json" 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version") || echo ""
           V_AFTER=$(node -p "require('./package.json').version")
-          echo "before=$V_BEFORE" >> $GITHUB_OUTPUT
-          echo "after=$V_AFTER" >> $GITHUB_OUTPUT
-          if [ -n "$V_BEFORE" ] && [ "$V_BEFORE" = "$V_AFTER" ]; then
-            echo "should_bump=true" >> $GITHUB_OUTPUT
+          if [ -n "$V_BEFORE" ] && [ "$V_BEFORE" != "$V_AFTER" ]; then
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "version=$V_AFTER" >> $GITHUB_OUTPUT
           else
-            echo "should_bump=false" >> $GITHUB_OUTPUT
+            if [ -n "$V_BEFORE" ] && [ "$V_BEFORE" = "$V_AFTER" ]; then
+              npm version patch --no-git-tag-version
+            fi
+            VERSION=$(node -p "require('./package.json').version")
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
 
-      - name: Bump patch version
-        run: npm version patch --no-git-tag-version
+      # When release PR was merged: version already bumped on main → create tag and release
+      - name: Create tag and release
+        if: steps.version.outputs.version_changed == 'true'
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" 2>/dev/null; then
+            echo "Release v${{ steps.version.outputs.version }} already exists, skipping"
+            exit 0
+          fi
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+          gh release create "v${{ steps.version.outputs.version }}" --generate-notes
         env:
-          npm_config_yes: "true"
-        if: steps.check.outputs.should_bump == 'true'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get new version
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-        if: steps.check.outputs.should_bump == 'true'
-
+      # When regular PR was merged: version not bumped → create release PR with auto-merge
       - name: Create release branch and push
+        if: steps.version.outputs.version_changed == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "release/v${{ steps.version.outputs.version }}"
           git add package.json package-lock.json
-          git commit -m "chore(release): v${{ steps.version.outputs.version }}"
-          # Remove stale remote branch from previous failed run (if any)
+          git diff --staged --quiet || git commit -m "chore(release): v${{ steps.version.outputs.version }}"
           git push origin --delete "release/v${{ steps.version.outputs.version }}" 2>/dev/null || true
           git push -u origin "release/v${{ steps.version.outputs.version }}"
-        if: steps.check.outputs.should_bump == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create PR and enable auto-merge
+        if: steps.version.outputs.version_changed == 'false'
         run: |
           gh pr create \
             --base main \
@@ -80,38 +83,3 @@ jobs:
           gh pr merge "release/v${{ steps.version.outputs.version }}" --auto --squash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.check.outputs.should_bump == 'true'
-
-  # Runs when a release PR is merged: create tag and release (triggers npm publish)
-  create-tag-and-release:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract version
-        id: version
-        run: |
-          REF="${{ github.event.pull_request.head.ref }}"
-          VERSION="${REF#release/v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Create tag and release
-        run: |
-          git fetch origin main
-          git checkout main
-          git pull origin main
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
-          gh release create "v${{ steps.version.outputs.version }}" --generate-notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete release branch
-        run: gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${{ github.event.pull_request.head.ref }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
