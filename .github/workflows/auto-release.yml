@@ -65,6 +65,8 @@ jobs:
           git checkout -b "release/v${{ steps.version.outputs.version }}"
           git add package.json package-lock.json
           git commit -m "chore(release): v${{ steps.version.outputs.version }}"
+          # Remove stale remote branch from previous failed run (if any)
+          git push origin --delete "release/v${{ steps.version.outputs.version }}" 2>/dev/null || true
           git push -u origin "release/v${{ steps.version.outputs.version }}"
         if: steps.check.outputs.should_bump == 'true'
 
