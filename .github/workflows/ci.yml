@@ -15,6 +15,10 @@ jobs:
         os: [ubuntu-latest]
         # only LTS versions
         node-version: [18.x, 20.x, 22.x, 24.x]
+        fastify-version: [4.x, 5.x]
+        exclude:
+          - node-version: 18.x
+            fastify-version: 5.x
 
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +28,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: npm ci
+      # --no-save keeps this install ephemeral in CI and avoids changing package.json/package-lock.json.
+      - name: Install Fastify ${{ matrix.fastify-version }}
+        run: npm install --no-save fastify@${{ matrix.fastify-version }}
       - run: npm run build
       - run: npm run lint
       - run: npm test
