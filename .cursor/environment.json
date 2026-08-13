@@ -1,0 +1,4 @@
+{
+  "name": "fastify-lcache",
+  "install": "npm ci"
+}
