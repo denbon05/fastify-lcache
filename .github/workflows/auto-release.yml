@@ -18,34 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Detect package.json version change
+      - name: Resolve package version
         id: version
         run: |
-          V_BEFORE=$(git show "${{ github.event.before }}:package.json" 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version") || true
-          V_AFTER=$(node -p "require('./package.json').version")
-          echo "version=$V_AFTER" >> "$GITHUB_OUTPUT"
-          if [ -n "$V_BEFORE" ] && [ "$V_BEFORE" != "$V_AFTER" ]; then
-            echo "version_changed=true" >> "$GITHUB_OUTPUT"
-            echo "Version changed: $V_BEFORE -> $V_AFTER"
-          else
-            echo "version_changed=false" >> "$GITHUB_OUTPUT"
-            echo "Version unchanged ($V_AFTER); skipping release"
-          fi
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Package version: $VERSION"
 
-      # Only publish a GitHub release when package.json was intentionally bumped.
-      # Automatic patch bumps on every main push are disabled.
-      - name: Create tag and release
-        if: steps.version.outputs.version_changed == 'true'
+      # No automatic version bumps. Create a GitHub release only when
+      # v{version} does not already exist (covers intentional bumps and
+      # catch-up when package.json was bumped without a release).
+      - name: Create release if missing
         run: |
-          if gh release view "v${{ steps.version.outputs.version }}" 2>/dev/null; then
-            echo "Release v${{ steps.version.outputs.version }} already exists, skipping"
+          VERSION="${{ steps.version.outputs.version }}"
+          if gh release view "v${VERSION}" 2>/dev/null; then
+            echo "Release v${VERSION} already exists, skipping"
             exit 0
           fi
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
-          gh release create "v${{ steps.version.outputs.version }}" --generate-notes
+          gh release create "v${VERSION}" --generate-notes --target "${{ github.sha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
