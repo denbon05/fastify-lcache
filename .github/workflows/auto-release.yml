@@ -27,15 +27,37 @@ jobs:
           echo "Package version: $VERSION"
 
       # No automatic version bumps. Create a GitHub release only when
-      # v{version} does not already exist (covers intentional bumps and
-      # catch-up when package.json was bumped without a release).
+      # v{version} does not already exist.
+      #
+      # NOTE: Releases created with GITHUB_TOKEN do NOT trigger other
+      # workflows' `on: release` hooks (GitHub recursion guard). So npm
+      # publish must happen in this job when we create the release.
       - name: Create release if missing
+        id: release
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           if gh release view "v${VERSION}" 2>/dev/null; then
             echo "Release v${VERSION} already exists, skipping"
+            echo "created=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           gh release create "v${VERSION}" --generate-notes --target "${{ github.sha }}"
+          echo "created=true" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        if: steps.release.outputs.created == 'true'
+        with:
+          node-version: "22.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npm
+        if: steps.release.outputs.created == 'true'
+        run: |
+          npm ci
+          npm test
+          npm run build
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
