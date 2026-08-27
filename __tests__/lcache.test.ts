@@ -353,9 +353,9 @@ describe("Light Cache Fastify plugin", () => {
       const value = "someValue";
 
       app.lcache.set(key, value);
-      // wait increased ttl time
+      // wait increased ttl time + small buffer for cleanup to complete
       await new Promise((resolve) => {
-        setTimeout(resolve, msToWait);
+        setTimeout(resolve, msToWait + 100);
       });
 
       expect(app.lcache.has(key)).toBeFalsy();
