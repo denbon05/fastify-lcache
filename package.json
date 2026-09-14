@@ -1,6 +1,6 @@
 {
   "name": "fastify-lcache",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Light cache plugin for fastify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,6 +51,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "fastify-plugin": "^3.0.1"
+    "fastify-plugin": "4.5.1"
   }
 }
