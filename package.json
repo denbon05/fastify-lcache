@@ -52,5 +52,10 @@
   },
   "dependencies": {
     "fastify-plugin": "4.5.1"
+  },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.1.0"
+    }
   }
 }
